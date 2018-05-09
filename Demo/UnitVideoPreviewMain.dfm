@@ -1,0 +1,244 @@
+object FormMain: TFormMain
+  Left = 393
+  Top = 281
+  Width = 633
+  Height = 396
+  Caption = 'FormMain'
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object GroupBoxCapture: TGroupBox
+    Left = 16
+    Top = 8
+    Width = 553
+    Height = 279
+    Caption = #25668#20687#22836#21442#25968
+    ParentBackground = False
+    TabOrder = 0
+    DesignSize = (
+      553
+      279)
+    object Label1: TLabel
+      Left = 24
+      Top = 32
+      Width = 246
+      Height = 12
+      Caption = #35831#36873#25321#27491#30830#30340#25668#20687#35774#22791#24182#25351#23450#25293#25668#29031#29255#30340#23610#23544':'
+      FocusControl = cbxCaptureDriver
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label4: TLabel
+      Left = 24
+      Top = 108
+      Width = 186
+      Height = 12
+      Caption = #29031#29255#23485#24230':           ('#21333#20301':'#20687#32032')'
+      FocusControl = SpinEditCapturePicWidth
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label5: TLabel
+      Left = 24
+      Top = 132
+      Width = 186
+      Height = 12
+      Caption = #29031#29255#39640#24230':           ('#21333#20301':'#20687#32032')'
+      FocusControl = SpinEditCapturePicHeight
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label2: TLabel
+      Left = 24
+      Top = 60
+      Width = 54
+      Height = 12
+      Caption = #25668#20687#39537#21160':'
+      FocusControl = cbxCaptureDriver
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label3: TLabel
+      Left = 24
+      Top = 84
+      Width = 60
+      Height = 12
+      Caption = #24403#21069#35774#22791': '
+      FocusControl = cbxCaptureDriver
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ParentFont = False
+    end
+    object cbxCaptureDriver: TComboBox
+      Left = 88
+      Top = 56
+      Width = 273
+      Height = 20
+      Style = csDropDownList
+      Anchors = [akLeft, akTop, akRight]
+      Color = clWhite
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ItemHeight = 12
+      ParentFont = False
+      TabOrder = 0
+      OnChange = cbxCaptureDriverChange
+    end
+    object SpinEditCapturePicWidth: TSpinEdit
+      Left = 88
+      Top = 104
+      Width = 49
+      Height = 21
+      Color = clWhite
+      Font.Charset = GB2312_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      MaxLength = 3
+      MaxValue = 300
+      MinValue = 100
+      ParentFont = False
+      TabOrder = 1
+      Value = 125
+    end
+    object SpinEditCapturePicHeight: TSpinEdit
+      Left = 88
+      Top = 128
+      Width = 49
+      Height = 21
+      Color = clWhite
+      Font.Charset = GB2312_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      MaxLength = 3
+      MaxValue = 300
+      MinValue = 100
+      ParentFont = False
+      TabOrder = 2
+      Value = 165
+    end
+    object BitBtnChangeVidCap: TBitBtn
+      Left = 24
+      Top = 168
+      Width = 89
+      Height = 28
+      Caption = #26356#25913#35774#22791
+      Enabled = False
+      TabOrder = 3
+      OnClick = BitBtnChangeVidCapClick
+    end
+    object BitBtnVideoPreview: TBitBtn
+      Left = 232
+      Top = 168
+      Width = 89
+      Height = 28
+      Caption = #24320#22987#39044#35272
+      Enabled = False
+      TabOrder = 4
+      OnClick = BitBtnVideoPreviewClick
+    end
+    object LabelCurVIDCap: TEdit
+      Left = 88
+      Top = 80
+      Width = 273
+      Height = 20
+      AutoSize = False
+      Color = clWhite
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 5
+      Text = '__________________________________'
+    end
+    object vcCapture: TVideoCap
+      Left = 377
+      Top = 27
+      Width = 160
+      Height = 219
+      color = clBlack
+      DriverOpen = False
+      DriverIndex = -1
+      VideoOverlay = False
+      VideoPreview = False
+      PreviewScaleToWindow = False
+      PreviewScaleProportional = True
+      PreviewRate = 30
+      MicroSecPerFrame = 66667
+      FrameRate = 15
+      CapAudio = False
+      VideoFileName = 'Video.avi'
+      SingleImageFile = 'Capture.bmp'
+      CapTimeLimit = 0
+      CapIndexSize = 0
+      CapToFile = True
+      BufferFileSize = 0
+    end
+    object BitBtnChangeFormat: TBitBtn
+      Left = 119
+      Top = 168
+      Width = 89
+      Height = 28
+      Caption = #26356#25913#26684#24335
+      Enabled = False
+      TabOrder = 7
+      OnClick = BitBtnChangeFormatClick
+    end
+    object BitBtnChangeDispaly: TBitBtn
+      Left = 24
+      Top = 202
+      Width = 89
+      Height = 28
+      Caption = #26356#25913#26174#31034
+      Enabled = False
+      TabOrder = 8
+      OnClick = BitBtnChangeDispalyClick
+    end
+    object BitBtnChangeCompression: TBitBtn
+      Left = 119
+      Top = 202
+      Width = 89
+      Height = 28
+      Caption = #26356#25913#21387#32553
+      Enabled = False
+      TabOrder = 9
+      OnClick = BitBtnChangeCompressionClick
+    end
+  end
+end
