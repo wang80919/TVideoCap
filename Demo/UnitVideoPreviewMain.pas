@@ -10,18 +10,13 @@ uses
 type
   TFormMain = class(TForm)
     GroupBoxCapture: TGroupBox;
-    Label1: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     cbxCaptureDriver: TComboBox;
-    SpinEditCapturePicWidth: TSpinEdit;
-    SpinEditCapturePicHeight: TSpinEdit;
     BitBtnChangeVidCap: TBitBtn;
     BitBtnVideoPreview: TBitBtn;
     LabelCurVIDCap: TEdit;
-    vcCapture: TVideoCap;
+    Capture: TVideoCap;
     BitBtnChangeFormat: TBitBtn;
     BitBtnChangeDispaly: TBitBtn;
     BitBtnChangeCompression: TBitBtn;
@@ -51,14 +46,14 @@ procedure TFormMain.cbxCaptureDriverChange(Sender: TObject);
 begin
   if not FisShowing then
   begin
-    vcCapture.DriverIndex := cbxCaptureDriver.ItemIndex;
-    if vcCapture.VideoPreview then
+    Capture.DriverIndex := cbxCaptureDriver.ItemIndex;
+    if Capture.VideoPreview then
     begin
-      BitBtnVideoPreview.Caption := '关闭预览';
+      BitBtnVideoPreview.Caption := 'StopPreview';
     end
     else
     begin
-      BitBtnVideoPreview.Caption := '开始预览';
+      BitBtnVideoPreview.Caption := 'StarePreview';
     end;
     if cbxCaptureDriver.ItemIndex >= 0 then
     begin
@@ -66,16 +61,16 @@ begin
     end
     else
     begin
-      LabelCurVIDCap.Text := '无';
-      vcCapture.VideoPreview := False;
-      vcCapture.DriverOpen := False;
-      BitBtnVideoPreview.Caption := '开始预览';
+      LabelCurVIDCap.Text := 'NA';
+      Capture.VideoPreview := False;
+      Capture.DriverOpen := False;
+      BitBtnVideoPreview.Caption := 'StarePreview';
     end;
-    BitBtnChangeVidCap.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and vcCapture.HasDlgSource;
-    BitBtnChangeFormat.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and vcCapture.HasDlgFormat;
+    BitBtnChangeVidCap.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgSource;
+    BitBtnChangeFormat.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgFormat;
     BitBtnVideoPreview.Enabled := (cbxCaptureDriver.ItemIndex >= 0);
-    BitBtnChangeDispaly.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and vcCapture.HasDlgDisplay;
-    BitBtnChangeCompression.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and vcCapture.HasDlgFormat;
+    BitBtnChangeDispaly.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgDisplay;
+    BitBtnChangeCompression.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgFormat;
   end;
 end;
 
@@ -101,10 +96,11 @@ begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
-      vcCapture.DlgVDisplay;
+      Capture.DlgVDisplay;
     except
-      sHint := '指定拍照所用的摄像设备目前无法使用，请检查摄像头是否' + sLineBreak +
-                 '与本计算机正常连接，请确定该设备处于可用状态！';
+      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+        'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
+        'Please make sure that the device is in available state.';
       Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
   end;
@@ -117,10 +113,11 @@ begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
-      vcCapture.DlgVCompression;
+      Capture.DlgVCompression;
     except
-      sHint := '指定拍照所用的摄像设备目前无法使用，请检查摄像头是否' + sLineBreak +
-                 '与本计算机正常连接，请确定该设备处于可用状态！';
+      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+        'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
+        'Please make sure that the device is in available state.';
       Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
   end;
@@ -133,10 +130,11 @@ begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
-      vcCapture.DlgVFormat;
+      Capture.DlgVFormat;
     except
-      sHint := '指定拍照所用的摄像设备目前无法使用，请检查摄像头是否' + sLineBreak +
-                 '与本计算机正常连接，请确定该设备处于可用状态！';
+      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+        'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
+        'Please make sure that the device is in available state.';
       Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
   end;
@@ -149,10 +147,11 @@ begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
-      vcCapture.DlgVSource;
+      Capture.DlgVSource;
     except
-      sHint := '指定拍照所用的摄像设备目前无法使用，请检查摄像头是否' + sLineBreak +
-                 '与本计算机正常连接，请确定该设备处于可用状态！';
+      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+        'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
+        'Please make sure that the device is in available state.';
       Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
     LabelCurVIDCap.Text :=  GetVideoCapDeviceNameByDriverIndex(cbxCaptureDriver.ItemIndex, True);
@@ -163,40 +162,41 @@ procedure TFormMain.BitBtnVideoPreviewClick(Sender: TObject);
 var
   sHint: string;
 begin
-  if vcCapture.VideoPreview then
+  if Capture.VideoPreview then
   begin
-    vcCapture.VideoPreview := False;
-    vcCapture.DriverOpen := False;
+    Capture.VideoPreview := False;
+    Capture.DriverOpen := False;
   end
   else
   begin
     try
-      vcCapture.VideoPreview := False;
-      vcCapture.DriverOpen := True;
-      vcCapture.VideoPreview := True;
+      Capture.VideoPreview := False;
+      Capture.DriverOpen := True;
+      Capture.VideoPreview := True;
       {
-      if vcCapture.CapWidth > vcCapture.CapHeight then
+      if Capture.CapWidth > Capture.CapHeight then
       begin
-        vcCapture.Height := vcCapture.Width * vcCapture.CapHeight div vcCapture.CapWidth;
+        Capture.Height := Capture.Width * Capture.CapHeight div Capture.CapWidth;
       end
       else
       begin
-        vcCapture.Width := vcCapture.Height * vcCapture.CapWidth div vcCapture.CapHeight;
+        Capture.Width := Capture.Height * Capture.CapWidth div Capture.CapHeight;
       end;
       //}
     except
-      sHint := '指定拍照所用的摄像设备目前无法使用，请检查摄像头是否' + sLineBreak +
-                 '与本计算机正常连接，请确定该设备处于可用状态！';
+      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+        'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
+        'Please make sure that the device is in available state.';
       Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
   end;
-  if vcCapture.VideoPreview then
+  if Capture.VideoPreview then
   begin
-    BitBtnVideoPreview.Caption := '关闭预览';
+    BitBtnVideoPreview.Caption := 'StopPreview';
   end
   else
   begin
-    BitBtnVideoPreview.Caption := '开始预览';
+    BitBtnVideoPreview.Caption := 'StarePreview';
   end;
 end;
 
