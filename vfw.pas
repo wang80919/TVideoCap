@@ -598,13 +598,13 @@ type
 function    ICInfo(fccType, fccHandler: DWORD; lpicinfo: PICINFO) : BOOL ; stdcall ;
 function    ICInstall(fccType, fccHandler: DWORD; lParam: LPARAM; szDesc: LPSTR; wFlags: UINT) : BOOL ; stdcall ;
 function    ICRemove(fccType, fccHandler: DWORD; wFlags: UINT) : BOOL ; stdcall ;
-function    ICGetInfo(hic: HIC; picinfo: PICINFO; cb: DWORD) : DWORD ; stdcall ;
+function    ICGetInfo(hic: HIC; picinfo: PICINFO; cb: DWORD) : LRESULT ; stdcall ;
 
 function    ICOpen(fccType, fccHandler: DWORD; wMode: UINT) : HIC ; stdcall ;
 function    ICOpenFunction(fccType, fccHandler: DWORD; wMode: UINT; lpfnHandler: TFarProc) : HIC ; stdcall ;
 function    ICClose(hic: HIC) : DWORD; stdcall ;
 
-function    ICSendMessage(hic: HIC; msg: UINT; dw1, dw2: DWORD) : DWORD ; stdcall ;
+function    ICSendMessage(hic: HIC; msg: UINT; dw1, dw2: DWORD_PTR) : LRESULT ; stdcall ;
 
 {-- Values for wFlags of ICInstall -------------------------------------------}
 
@@ -1212,7 +1212,7 @@ const
     PD_STRETCHDIB_1_2_OK        = $0008;    // ...
     PD_STRETCHDIB_1_N_OK        = $0010;    // ...
 
-function    DrawDibProfileDisplay(lpbi: PBITMAPINFOHEADER): DWORD; stdcall;
+function    DrawDibProfileDisplay(lpbi: PBITMAPINFOHEADER): BOOL; stdcall;
 
 (****************************************************************************
  *
@@ -1339,7 +1339,7 @@ function    TWOCCFromFOURCC(fcc: DWORD): WORD;
 {-- Macro to make a ckid for a chunk out of a TWOCC and a stream num (0-255) -}
 
 function    ToHex(n: BYTE): BYTE;
-function    MAKEAVICKID(tcc: WORD; stream: BYTE): DWORD;
+function    MAKEAVICKID(tcc: WORD; stream: BYTE): Longint;
 
 {-- Main AVI file header -----------------------------------------------------}
 
@@ -2072,7 +2072,7 @@ const
 //    UNICODE strings and then calling the corresponding UNICODE entrypoint.
 //
 
-function    MCIWndSM(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): DWORD;
+function    MCIWndSM(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT;
 
 const
     MCIWND_WINDOW_CLASS             = 'MCIWndClass' ;
@@ -2132,64 +2132,64 @@ function    MCIWndCanEject(hwnd: HWND): BOOL;
 function    MCIWndCanConfig(hwnd: HWND): BOOL;
 function    MCIWndPaletteKick(hwnd: HWND): BOOL;
 
-function    MCIWndSave(hwnd: HWND; szFile: LPCTSTR): DWORD;
-function    MCIWndSaveDialog(hwnd: HWND): DWORD;
+function    MCIWndSave(hwnd: HWND; szFile: LPCTSTR): LONG;
+function    MCIWndSaveDialog(hwnd: HWND): LONG;
 
 // If you dont give a device it will use the current device....
 
-function    MCIWndNew(hwnd: HWND; lp: PVOID): DWORD;
-function    MCIWndRecord(hwnd: HWND): DWORD;
-function    MCIWndOpen(hwnd: HWND; sz: LPCTSTR; f: BOOL): DWORD;
-function    MCIWndOpenDialog(hwnd: HWND): DWORD;
-function    MCIWndClose(hwnd: HWND): DWORD;
-function    MCIWndPlay(hwnd: HWND): DWORD;
-function    MCIWndStop(hwnd: HWND): DWORD;
-function    MCIWndPause(hwnd: HWND): DWORD;
-function    MCIWndResume(hwnd: HWND): DWORD;
-function    MCIWndSeek(hwnd: HWND; lPos: DWORD): DWORD;
-function    MCIWndEject(hwnd: HWND): DWORD;
+function    MCIWndNew(hwnd: HWND; lp: PVOID): LONG;
+function    MCIWndRecord(hwnd: HWND): LONG;
+function    MCIWndOpen(hwnd: HWND; sz: LPCTSTR; f: BOOL): LONG;
+function    MCIWndOpenDialog(hwnd: HWND): LONG;
+function    MCIWndClose(hwnd: HWND): LONG;
+function    MCIWndPlay(hwnd: HWND): LONG;
+function    MCIWndStop(hwnd: HWND): LONG;
+function    MCIWndPause(hwnd: HWND): LONG;
+function    MCIWndResume(hwnd: HWND): LONG;
+function    MCIWndSeek(hwnd: HWND; lPos: DWORD): LONG;
+function    MCIWndEject(hwnd: HWND): LONG;
 
-function    MCIWndHome(hwnd: HWND): DWORD;
-function    MCIWndEnd(hwnd: HWND): DWORD;
+function    MCIWndHome(hwnd: HWND): LONG;
+function    MCIWndEnd(hwnd: HWND): LONG;
 
-function    MCIWndGetSource(hwnd: HWND; prc: PRECT): DWORD;
-function    MCIWndPutSource(hwnd: HWND; prc: PRECT): DWORD;
+function    MCIWndGetSource(hwnd: HWND; prc: PRECT): LONG ;
+function    MCIWndPutSource(hwnd: HWND; prc: PRECT): LONG;
 
-function    MCIWndGetDest(hwnd: HWND; prc: PRECT): DWORD;
-function    MCIWndPutDest(hwnd: HWND; prc: PRECT): DWORD;
+function    MCIWndGetDest(hwnd: HWND; prc: PRECT): LONG;
+function    MCIWndPutDest(hwnd: HWND; prc: PRECT): LONG;
 
-function    MCIWndPlayReverse(hwnd: HWND): DWORD;
-function    MCIWndPlayFrom(hwnd: HWND; lPos: DWORD): DWORD;
-function    MCIWndPlayTo(hwnd: HWND; lPos: DWORD): DWORD;
-function    MCIWndPlayFromTo(hwnd: HWND; lStart, lEnd: DWORD): DWORD;
+function    MCIWndPlayReverse(hwnd: HWND): LONG;
+function    MCIWndPlayFrom(hwnd: HWND; lPos: DWORD): LONG;
+function    MCIWndPlayTo(hwnd: HWND; lPos: DWORD): LONG;
+function    MCIWndPlayFromTo(hwnd: HWND; lStart, lEnd: DWORD): LONG;
 
 function    MCIWndGetDeviceID(hwnd: HWND): UINT;
 function    MCIWndGetAlias(hwnd: HWND): UINT;
-function    MCIWndGetMode(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
-function    MCIWndGetPosition(hwnd: HWND): DWORD;
-function    MCIWndGetPositionString(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
-function    MCIWndGetStart(hwnd: HWND): DWORD;
-function    MCIWndGetLength(hwnd: HWND): DWORD;
-function    MCIWndGetEnd(hwnd: HWND): DWORD;
+function    MCIWndGetMode(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
+function    MCIWndGetPosition(hwnd: HWND): LONG;
+function    MCIWndGetPositionString(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
+function    MCIWndGetStart(hwnd: HWND): LONG;
+function    MCIWndGetLength(hwnd: HWND): LONG;
+function    MCIWndGetEnd(hwnd: HWND): LONG;
 
-function    MCIWndStep(hwnd: HWND; n: DWORD): DWORD;
+function    MCIWndStep(hwnd: HWND; n: DWORD): LONG;
 
 procedure   MCIWndDestroy(hwnd: HWND);
 procedure   MCIWndSetZoom(hwnd: HWND; iZoom: UINT);
 function    MCIWndGetZoom(hwnd: HWND): UINT;
-function    MCIWndSetVolume(hwnd: HWND; iVol: UINT): DWORD;
-function    MCIWndGetVolume(hwnd: HWND): DWORD;
-function    MCIWndSetSpeed(hwnd: HWND; iSpeed: UINT): DWORD;
-function    MCIWndGetSpeed(hwnd: HWND): DWORD;
-function    MCIWndSetTimeFormat(hwnd: HWND; lp: LPCTSTR): DWORD;
-function    MCIWndGetTimeFormat(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
+function    MCIWndSetVolume(hwnd: HWND; iVol: UINT): LONG;
+function    MCIWndGetVolume(hwnd: HWND): LONG;
+function    MCIWndSetSpeed(hwnd: HWND; iSpeed: UINT): LONG;
+function    MCIWndGetSpeed(hwnd: HWND): LONG;
+function    MCIWndSetTimeFormat(hwnd: HWND; lp: LPCTSTR): LONG;
+function    MCIWndGetTimeFormat(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
 procedure   MCIWndValidateMedia(hwnd: HWND);
 
 procedure   MCIWndSetRepeat(hwnd: HWND; f: BOOL);
 function    MCIWndGetRepeat(hwnd: HWND): BOOL;
 
-function    MCIWndUseFrames(hwnd: HWND): DWORD;
-function    MCIWndUseTime(hwnd: HWND): DWORD;
+function    MCIWndUseFrames(hwnd: HWND): LONG;
+function    MCIWndUseTime(hwnd: HWND): LONG;
 
 procedure   MCIWndSetActiveTimer(hwnd: HWND; active: UINT);
 procedure   MCIWndSetInactiveTimer(hwnd: HWND; inactive: UINT);
@@ -2197,29 +2197,29 @@ procedure   MCIWndSetTimers(hwnd: HWND; active, inactive: UINT);
 function    MCIWndGetActiveTimer(hwnd: HWND): UINT;
 function    MCIWndGetInactiveTimer(hwnd: HWND): UINT;
 
-function    MCIWndRealize(hwnd: HWND; fBkgnd: BOOL): DWORD;
+function    MCIWndRealize(hwnd: HWND; fBkgnd: BOOL): LONG;
 
-function    MCIWndSendString(hwnd: HWND; sz: LPCTSTR): DWORD;
-function    MCIWndReturnString(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
-function    MCIWndGetError(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
+function    MCIWndSendString(hwnd: HWND; sz: LPCTSTR): LONG;
+function    MCIWndReturnString(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
+function    MCIWndGetError(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
 
 // #define MCIWndActivate(hwnd, f)     (void)MCIWndSM(hwnd, WM_ACTIVATE, (WPARAM)(BOOL)(f), 0)
 
 function    MCIWndGetPalette(hwnd: HWND): HPALETTE;
-function    MCIWndSetPalette(hwnd: HWND; hpal: HPALETTE): DWORD;
+function    MCIWndSetPalette(hwnd: HWND; hpal: HPALETTE): LONG;
 
-function    MCIWndGetFileName(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
-function    MCIWndGetDevice(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
+function    MCIWndGetFileName(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
+function    MCIWndGetDevice(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
 
 function    MCIWndGetStyles(hwnd: HWND): UINT;
-function    MCIWndChangeStyles(hwnd: HWND; mask: UINT; value: DWORD): DWORD;
+function    MCIWndChangeStyles(hwnd: HWND; mask: UINT; value: DWORD): LONG;
 
 type
     PUnknown    = ^IUnknown;
 
-function    MCIWndOpenInterface(hwnd: HWND; pUnk: PUnknown): DWORD;
+function    MCIWndOpenInterface(hwnd: HWND; pUnk: PUnknown): LONG;
 
-function    MCIWndSetOwner(hwnd: HWND; hwndP: HWND): DWORD;
+function    MCIWndSetOwner(hwnd: HWND; hwndP: HWND): LONG;
 
 {-- Messages an app will send to MCIWND --------------------------------------}
 
@@ -2396,9 +2396,9 @@ type
         dwBufferLength      : DWORD;                // Length of data buffer
         dwBytesUsed         : DWORD;                // Bytes actually used
         dwTimeCaptured      : DWORD;                // Milliseconds from start of stream
-        dwUser              : DWORD;                // for client's use
+        dwUser              : DWORD_PTR;                // for client's use
         dwFlags             : DWORD;                // assorted flags (see defines)
-        dwReserved          : array[0..3] of DWORD; // reserved for driver
+        dwReserved          : array[0..3] of DWORD_PTR; // reserved for driver
     end;
 
 {-- dwFlags field of VIDEOHDR ------------------------------------------------}
@@ -2480,7 +2480,7 @@ const
 
 {== AVICAP - Window class for AVI capture ====================================}
 
-function    AVICapSM(hwnd: HWND; m: UINT; w: WPARAM; l: LPARAM): DWORD;
+function    AVICapSM(hwnd: HWND; m: UINT; w: WPARAM; l: LPARAM): LRESULT;
 
 {-- Window messages WM_CAP... which can be sent to an AVICAP window ----------}
 
@@ -2611,19 +2611,19 @@ const
 {-- Callback definitions -----------------------------------------------------}
 
 type
-    TCAPYIELDCALLBACK               = function(hWnd: HWND): DWORD; stdcall;
+    TCAPYIELDCALLBACK               = function(hWnd: HWND): LRESULT ; stdcall;
 
-    TCAPSTATUSCALLBACKW             = function(hWnd: HWND; nID: int; lpsz: LPCWSTR): DWORD; stdcall;
-    TCAPERRORCALLBACKW              = function(hWnd: HWND; nID: int; lpsz: LPCWSTR): DWORD; stdcall;
-    TCAPSTATUSCALLBACKA             = function(hWnd: HWND; nID: int; lpsz: LPCSTR): DWORD; stdcall;
-    TCAPERRORCALLBACKA              = function(hWnd: HWND; nID: int; lpsz: LPCSTR): DWORD; stdcall;
+    TCAPSTATUSCALLBACKW             = function(hWnd: HWND; nID: int; lpsz: LPCWSTR): LRESULT ; stdcall;
+    TCAPERRORCALLBACKW              = function(hWnd: HWND; nID: int; lpsz: LPCWSTR): LRESULT ; stdcall;
+    TCAPSTATUSCALLBACKA             = function(hWnd: HWND; nID: int; lpsz: LPCSTR): LRESULT ; stdcall;
+    TCAPERRORCALLBACKA              = function(hWnd: HWND; nID: int; lpsz: LPCSTR): LRESULT ; stdcall;
 
     TCAPSTATUSCALLBACK              = {$IFDEF UNICODE}TCAPSTATUSCALLBACKW{$ELSE}TCAPSTATUSCALLBACKA{$ENDIF};
     TCAPERRORCALLBACK               = {$IFDEF UNICODE}TCAPERRORCALLBACKW{$ELSE}TCAPERRORCALLBACKA{$ENDIF};
 
-    TCAPVIDEOCALLBACK               = function(hWnd: HWND; lpVHdr: PVIDEOHDR): DWORD; stdcall;
-    TCAPWAVECALLBACK                = function(hWnd: HWND; lpWHdr: PWAVEHDR): DWORD; stdcall;
-    TCAPCONTROLCALLBACK             = function(hWnd: HWND; nState: int): DWORD; stdcall;
+    TCAPVIDEOCALLBACK               = function(hWnd: HWND; lpVHdr: PVIDEOHDR): LRESULT ; stdcall;
+    TCAPWAVECALLBACK                = function(hWnd: HWND; lpWHdr: PWAVEHDR): LRESULT ; stdcall;
+    TCAPCONTROLCALLBACK             = function(hWnd: HWND; nState: int): LRESULT ; stdcall;
 
 {-- Structures ---------------------------------------------------------------}
 
@@ -2717,7 +2717,7 @@ type
     TCAPINFOCHUNK                   = record
         fccInfoID                   : FOURCC;   // Chunk ID, "ICOP" for copyright
         lpData                      : PVOID;    // pointer to data
-        cbData                      : DWORD;     // size of lpData
+        cbData                      : LONG;     // size of lpData
     end;
 
 {-- CapControlCallback states ------------------------------------------------}
@@ -2741,7 +2741,7 @@ function    capSetCallbackOnWaveStream(hwnd: HWND; fpProc: TCAPWAVECALLBACK): BO
 function    capSetCallbackOnCapControl(hwnd: HWND; fpProc: TCAPCONTROLCALLBACK): BOOL;
 
 function    capSetUserData(hwnd: HWND; lUser: DWORD): BOOL;
-function    capGetUserData(hwnd: HWND): DWORD;
+function    capGetUserData(hwnd: HWND): LPARAM;
 
 function    capDriverConnect(hwnd: HWND; i: INT): BOOL;
 function    capDriverDisconnect(hwnd: HWND): BOOL;
@@ -3397,7 +3397,7 @@ begin
         Result := n + Ord('0');
 end;
 
-function    MAKEAVICKID(tcc: WORD; stream: BYTE): DWORD;
+function    MAKEAVICKID(tcc: WORD; stream: BYTE): Longint;
 begin
     Result := MakeLONG((ToHex(stream and $0F) shl 8) or ToHex((stream and $F0) shr 4),tcc);
 end;
@@ -3511,7 +3511,7 @@ end;
 
 {== MCIWnd ===================================================================}
 
-function    MCIWndSM(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): DWORD;
+function    MCIWndSM(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT;
 begin
     Result := SendMessage(hWnd, Msg, wParam, lParam);
 end;
@@ -3553,119 +3553,119 @@ begin
     Result  := MCIWndSM(hwnd,MCIWNDM_PALETTEKICK,0,0) <> 0;
 end;
 
-function    MCIWndSave(hwnd: HWND; szFile: LPCTSTR): DWORD;
+function    MCIWndSave(hwnd: HWND; szFile: LPCTSTR): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_SAVE, 0, LPARAM(szFile));
 end;
 
-function    MCIWndSaveDialog(hwnd: HWND): DWORD;
+function    MCIWndSaveDialog(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSave(hwnd, LPCTSTR(-1));
 end;
 
 // If you dont give a device it will use the current device....
 
-function    MCIWndNew(hwnd: HWND; lp: PVOID): DWORD;
+function    MCIWndNew(hwnd: HWND; lp: PVOID): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_NEW, 0, LPARAM(lp));
 end;
 
-function    MCIWndRecord(hwnd: HWND): DWORD;
+function    MCIWndRecord(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_RECORD, 0, 0);
 end;
 
-function    MCIWndOpen(hwnd: HWND; sz: LPCTSTR; f: BOOL): DWORD;
+function    MCIWndOpen(hwnd: HWND; sz: LPCTSTR; f: BOOL): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_OPEN, WPARAM(f), LPARAM(sz));
 end;
 
-function    MCIWndOpenDialog(hwnd: HWND): DWORD;
+function    MCIWndOpenDialog(hwnd: HWND): LONG;
 begin
     Result  := MCIWndOpen(hwnd, LPCTSTR(-1), False);
 end;
 
-function    MCIWndClose(hwnd: HWND): DWORD;
+function    MCIWndClose(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_CLOSE, 0, 0);
 end;
 
-function    MCIWndPlay(hwnd: HWND): DWORD;
+function    MCIWndPlay(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_PLAY, 0, 0);
 end;
 
-function    MCIWndStop(hwnd: HWND): DWORD;
+function    MCIWndStop(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_STOP, 0, 0);
 end;
 
-function    MCIWndPause(hwnd: HWND): DWORD;
+function    MCIWndPause(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_PAUSE, 0, 0);
 end;
 
-function    MCIWndResume(hwnd: HWND): DWORD;
+function    MCIWndResume(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_RESUME, 0, 0);
 end;
 
-function    MCIWndSeek(hwnd: HWND; lPos: DWORD): DWORD;
+function    MCIWndSeek(hwnd: HWND; lPos: DWORD): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_SEEK, 0, lPos);
 end;
 
-function    MCIWndEject(hwnd: HWND): DWORD;
+function    MCIWndEject(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_EJECT, 0, 0);
 end;
 
-function    MCIWndHome(hwnd: HWND): DWORD;
+function    MCIWndHome(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSeek(hwnd, MCIWND_START);
 end;
 
-function    MCIWndEnd(hwnd: HWND): DWORD;
+function    MCIWndEnd(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSeek(hwnd, MCIWND_END);
 end;
 
-function    MCIWndGetSource(hwnd: HWND; prc: PRECT): DWORD;
+function    MCIWndGetSource(hwnd: HWND; prc: PRECT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GET_SOURCE, 0, LPARAM(prc));
 end;
 
-function    MCIWndPutSource(hwnd: HWND; prc: PRECT): DWORD;
+function    MCIWndPutSource(hwnd: HWND; prc: PRECT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_PUT_SOURCE, 0, LPARAM(prc));
 end;
 
-function    MCIWndGetDest(hwnd: HWND; prc: PRECT): DWORD;
+function    MCIWndGetDest(hwnd: HWND; prc: PRECT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GET_DEST, 0, LPARAM(prc));
 end;
 
-function    MCIWndPutDest(hwnd: HWND; prc: PRECT): DWORD;
+function    MCIWndPutDest(hwnd: HWND; prc: PRECT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_PUT_DEST, 0, LPARAM(prc));
 end;
 
-function    MCIWndPlayReverse(hwnd: HWND): DWORD;
+function    MCIWndPlayReverse(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_PLAYREVERSE, 0, 0);
 end;
 
-function    MCIWndPlayFrom(hwnd: HWND; lPos: DWORD): DWORD;
+function    MCIWndPlayFrom(hwnd: HWND; lPos: DWORD): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_PLAYFROM, 0, lPos);
 end;
 
-function    MCIWndPlayTo(hwnd: HWND; lPos: DWORD): DWORD;
+function    MCIWndPlayTo(hwnd: HWND; lPos: DWORD): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_PLAYTO, 0, lPos);
 end;
 
-function    MCIWndPlayFromTo(hwnd: HWND; lStart, lEnd: DWORD): DWORD;
+function    MCIWndPlayFromTo(hwnd: HWND; lStart, lEnd: DWORD): LONG;
 begin
     MCIWndSeek(hwnd, lStart);
     Result  := MCIWndPlayTo(hwnd, lEnd);
@@ -3681,37 +3681,37 @@ begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETALIAS, 0, 0);
 end;
 
-function    MCIWndGetMode(hwnd: HWND; lp: LPCTSTR; len: UINT): DWORD;
+function    MCIWndGetMode(hwnd: HWND; lp: LPCTSTR; len: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETMODE, len, LPARAM(lp));
 end;
 
-function    MCIWndGetPosition(hwnd: HWND): DWORD;
+function    MCIWndGetPosition(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETPOSITION, 0, 0);
 end;
 
-function    MCIWndGetPositionString(hwnd: HWND; lp: LPCTSTR; len: UINT): DWORD;
+function    MCIWndGetPositionString(hwnd: HWND; lp: LPCTSTR; len: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETPOSITION, len, LPARAM(lp));
 end;
 
-function    MCIWndGetStart(hwnd: HWND): DWORD;
+function    MCIWndGetStart(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETSTART, 0, 0);
 end;
 
-function    MCIWndGetLength(hwnd: HWND): DWORD;
+function    MCIWndGetLength(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETLENGTH, 0, 0);
 end;
 
-function    MCIWndGetEnd(hwnd: HWND): DWORD;
+function    MCIWndGetEnd(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETEND, 0, 0);
 end;
 
-function    MCIWndStep(hwnd: HWND; n: DWORD): DWORD;
+function    MCIWndStep(hwnd: HWND; n: DWORD): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCI_STEP, 0, n);
 end;
@@ -3731,32 +3731,32 @@ begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETZOOM, 0, 0);
 end;
 
-function    MCIWndSetVolume(hwnd: HWND; iVol: UINT): DWORD;
+function    MCIWndSetVolume(hwnd: HWND; iVol: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_SETVOLUME, 0, iVol);
 end;
 
-function    MCIWndGetVolume(hwnd: HWND): DWORD;
+function    MCIWndGetVolume(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETVOLUME, 0, 0);
 end;
 
-function    MCIWndSetSpeed(hwnd: HWND; iSpeed: UINT): DWORD;
+function    MCIWndSetSpeed(hwnd: HWND; iSpeed: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_SETSPEED, 0, iSpeed);
 end;
 
-function    MCIWndGetSpeed(hwnd: HWND): DWORD;
+function    MCIWndGetSpeed(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETSPEED, 0, 0);
 end;
 
-function    MCIWndSetTimeFormat(hwnd: HWND; lp: LPCTSTR): DWORD;
+function    MCIWndSetTimeFormat(hwnd: HWND; lp: LPCTSTR): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_SETTIMEFORMAT, 0, LPARAM(lp));
 end;
 
-function    MCIWndGetTimeFormat(hwnd: HWND; lp: LPCTSTR; len: UINT): DWORD;
+function    MCIWndGetTimeFormat(hwnd: HWND; lp: LPCTSTR; len: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETTIMEFORMAT, len, LPARAM(lp));
 end;
@@ -3776,12 +3776,12 @@ begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETREPEAT, 0, 0) <> 0;
 end;
 
-function    MCIWndUseFrames(hwnd: HWND): DWORD;
+function    MCIWndUseFrames(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSetTimeFormat(hwnd, 'frames');
 end;
 
-function    MCIWndUseTime(hwnd: HWND): DWORD;
+function    MCIWndUseTime(hwnd: HWND): LONG;
 begin
     Result  := MCIWndSetTimeFormat(hwnd, 'ms');
 end;
@@ -3811,22 +3811,22 @@ begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETINACTIVETIMER, 0, 0);
 end;
 
-function    MCIWndRealize(hwnd: HWND; fBkgnd: BOOL): DWORD;
+function    MCIWndRealize(hwnd: HWND; fBkgnd: BOOL): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_REALIZE, WPARAM(fBkgnd), 0);
 end;
 
-function    MCIWndSendString(hwnd: HWND; sz: LPCTSTR): DWORD;
+function    MCIWndSendString(hwnd: HWND; sz: LPCTSTR): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_SENDSTRING, 0, LPARAM(sz));
 end;
 
-function    MCIWndReturnString(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
+function    MCIWndReturnString(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_RETURNSTRING, len, LPARAM(lp));
 end;
 
-function    MCIWndGetError(hwnd: HWND; lp: LPTSTR; len: UINT): DWORD;
+function    MCIWndGetError(hwnd: HWND; lp: LPTSTR; len: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETERROR, len, LPARAM(lp));
 end;
@@ -3836,17 +3836,17 @@ begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETPALETTE, 0, 0);
 end;
 
-function    MCIWndSetPalette(hwnd: HWND; hpal: HPALETTE): DWORD;
+function    MCIWndSetPalette(hwnd: HWND; hpal: HPALETTE): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_SETPALETTE, hpal, 0);
 end;
 
-function    MCIWndGetFileName(hwnd: HWND; lp: LPCTSTR; len: UINT): DWORD;
+function    MCIWndGetFileName(hwnd: HWND; lp: LPCTSTR; len: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETFILENAME, len, LPARAM(lp));
 end;
 
-function    MCIWndGetDevice(hwnd: HWND; lp: LPCTSTR; len: UINT): DWORD;
+function    MCIWndGetDevice(hwnd: HWND; lp: LPCTSTR; len: UINT): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETDEVICE, len, LPARAM(lp));
 end;
@@ -3856,24 +3856,24 @@ begin
     Result  := MCIWndSM(hwnd, MCIWNDM_GETSTYLES, 0, 0);
 end;
 
-function    MCIWndChangeStyles(hwnd: HWND; mask: UINT; value: DWORD): DWORD;
+function    MCIWndChangeStyles(hwnd: HWND; mask: UINT; value: DWORD): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_CHANGESTYLES, mask, value);
 end;
 
-function    MCIWndOpenInterface(hwnd: HWND; pUnk: PUNKNOWN): DWORD;
+function    MCIWndOpenInterface(hwnd: HWND; pUnk: PUNKNOWN): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_OPENINTERFACE, 0, LPARAM(pUnk));
 end;
 
-function    MCIWndSetOwner(hwnd: HWND; hwndP: HWND): DWORD;
+function    MCIWndSetOwner(hwnd: HWND; hwndP: HWND): LONG;
 begin
     Result  := MCIWndSM(hwnd, MCIWNDM_SETOWNER, hwndP, 0);
 end;
 
 {== AVICAP - Window class for AVI capture ====================================}
 
-function    AVICapSM(hwnd: HWND; m: UINT; w: WPARAM; l: LPARAM): DWORD;
+function    AVICapSM(hwnd: HWND; m: UINT; w: WPARAM; l: LPARAM): LRESULT;
 begin
     if IsWindow(hwnd) then
         Result := SendMessage(hwnd,m,w,l)
@@ -3923,7 +3923,7 @@ begin
     Result  := AVICapSM(hwnd, WM_CAP_SET_USER_DATA, 0, lUser) <> 0;
 end;
 
-function    capGetUserData(hwnd: HWND): DWORD;
+function    capGetUserData(hwnd: HWND): LPARAM;
 begin
     Result  := AVICapSM(hwnd, WM_CAP_GET_USER_DATA, 0, 0);
 end;
@@ -4181,13 +4181,13 @@ function    VideoForWindowsVersion: DWord; pascal; external VFWDLL;
 function    ICInfo(fccType, fccHandler: DWORD; lpicinfo: PICINFO) : BOOL ; stdcall ; external VFWDLL;
 function    ICInstall(fccType, fccHandler: DWORD; lParam: LPARAM; szDesc: LPSTR; wFlags: UINT) : BOOL ; stdcall ; external VFWDLL;
 function    ICRemove(fccType, fccHandler: DWORD; wFlags: UINT) : BOOL ; stdcall ; external VFWDLL;
-function    ICGetInfo(hic: HIC; picinfo: PICINFO; cb: DWORD) : DWORD ; stdcall ; external VFWDLL;
+function    ICGetInfo(hic: HIC; picinfo: PICINFO; cb: DWORD) : LRESULT ; stdcall ; external VFWDLL;
 
 function    ICOpen(fccType, fccHandler: DWORD; wMode: UINT) : HIC ; stdcall ; external VFWDLL;
 function    ICOpenFunction(fccType, fccHandler: DWORD; wMode: UINT; lpfnHandler: TFarProc) : HIC ; stdcall ; external VFWDLL;
 function    ICClose(hic: HIC) : DWORD ; stdcall ; external VFWDLL;
 
-function    ICSendMessage(hic: HIC; msg: UINT; dw1, dw2: DWORD) : DWORD ; stdcall ; external VFWDLL;
+function    ICSendMessage(hic: HIC; msg: UINT; dw1, dw2: DWORD_PTR) : LRESULT ; stdcall ; external VFWDLL;
 
 {== Compression functions ====================================================}
 
@@ -4387,7 +4387,7 @@ function    DrawDibTime(hdd: HDRAWDIB; lpddtime: PDRAWDIBTIME): BOOL; stdcall; e
 
 {-- Display profiling --------------------------------------------------------}
 
-function    DrawDibProfileDisplay(lpbi: PBITMAPINFOHEADER): DWORD; stdcall; external VFWDLL;
+function    DrawDibProfileDisplay(lpbi: PBITMAPINFOHEADER): BOOL; stdcall; external VFWDLL;
 
 {-- Functions ----------------------------------------------------------------}
 

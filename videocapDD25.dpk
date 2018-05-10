@@ -27,7 +27,7 @@ package videocapDD25;
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'Video Captura 2.4 TVideoCap Designtime'}
+{$DESCRIPTION 'Video Captura 2.5 TVideoCap Designtime'}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 

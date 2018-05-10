@@ -27,7 +27,7 @@ package videocapRD25;
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'Video Captura 2.4 TVideoCap'}
+{$DESCRIPTION 'Video Captura 2.5 TVideoCap'}
 {$RUNONLY}
 {$IMPLICITBUILD ON}
 

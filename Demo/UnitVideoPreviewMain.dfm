@@ -3,7 +3,7 @@ object FormMain: TFormMain
   Top = 281
   Caption = 'FormMain'
   ClientHeight = 487
-  ClientWidth = 654
+  ClientWidth = 655
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,16 +18,12 @@ object FormMain: TFormMain
   object GroupBoxCapture: TGroupBox
     Left = 0
     Top = 0
-    Width = 654
+    Width = 655
     Height = 113
     Align = alTop
     Caption = 'Settings'
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 617
-    DesignSize = (
-      654
-      113)
     object Label2: TLabel
       Left = 24
       Top = 27
@@ -59,10 +55,9 @@ object FormMain: TFormMain
     object cbxCaptureDriver: TComboBox
       Left = 88
       Top = 22
-      Width = 374
+      Width = 346
       Height = 20
       Style = csDropDownList
-      Anchors = [akLeft, akTop, akRight]
       Color = clWhite
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
@@ -88,7 +83,7 @@ object FormMain: TFormMain
       Top = 74
       Width = 89
       Height = 28
-      Caption = 'StarePreview'
+      Caption = 'StartPreview'
       Enabled = False
       TabOrder = 5
       OnClick = BitBtnVideoPreviewClick
@@ -96,7 +91,7 @@ object FormMain: TFormMain
     object LabelCurVIDCap: TEdit
       Left = 88
       Top = 48
-      Width = 273
+      Width = 346
       Height = 20
       AutoSize = False
       Color = clWhite
@@ -133,18 +128,55 @@ object FormMain: TFormMain
     object BitBtnChangeCompression: TBitBtn
       Left = 311
       Top = 74
-      Width = 89
+      Width = 123
       Height = 28
       Caption = 'ChangeCompression'
       Enabled = False
       TabOrder = 4
       OnClick = BitBtnChangeCompressionClick
     end
+    object Button1: TButton
+      Left = 470
+      Top = 19
+      Width = 59
+      Height = 25
+      Caption = 'Button1'
+      TabOrder = 7
+      OnClick = Button1Click
+    end
+    object Button2: TButton
+      Left = 535
+      Top = 19
+      Width = 58
+      Height = 25
+      Caption = 'Button2'
+      TabOrder = 8
+      OnClick = Button2Click
+    end
+    object Button3: TButton
+      Left = 599
+      Top = 19
+      Width = 50
+      Height = 25
+      Caption = 'Button3'
+      TabOrder = 9
+      OnClick = Button3Click
+    end
+    object BitBtnSaveToClipboard: TBitBtn
+      Left = 535
+      Top = 74
+      Width = 106
+      Height = 28
+      Caption = 'CopyToClipboard'
+      Enabled = False
+      TabOrder = 10
+      OnClick = BitBtnSaveToClipboardClick
+    end
   end
   object Capture: TVideoCap
     Left = 0
     Top = 113
-    Width = 654
+    Width = 655
     Height = 374
     align = alClient
     color = clBlack
@@ -164,6 +196,5 @@ object FormMain: TFormMain
     CapIndexSize = 0
     CapToFile = True
     BufferFileSize = 0
-    ExplicitTop = 119
   end
 end

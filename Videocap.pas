@@ -11,7 +11,7 @@ interface
 
  uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls,stdctrls,
-  ExtCtrls, VFW, MMSystem, SyncObjs;
+  ExtCtrls, VFW, MMSystem, SyncObjs, JPEG;
 
 type
 // Audio
@@ -57,6 +57,11 @@ TAudioFormat = class (TPersistent)
 type
   TVideoCap = class(TCustomControl)
   private
+    FJPEGSectionTypeList: array of UInt8;
+    FMemorForPreview: TMemoryStream;
+    FImgForPreview: TImage;
+    FControlForPreview: TCustomControl;
+    fCenter: Boolean;
    fdriverIndex         : Integer;
    fVideoDriverName     : String;
    fhCapWnd             : THandle;
@@ -93,6 +98,7 @@ type
    function GetOverlay: Boolean;
    procedure SizeCap;
    procedure Setprop (value: Boolean);
+   procedure SetCenter (Value: Boolean);
    procedure SetMicroSecPerFrame(value: Cardinal);
    procedure setFrameRate (value: Word);
    function  GetFrameRate: Word;
@@ -124,7 +130,11 @@ type
     procedure SetCapAudioStream(value:TAudioStream);
     procedure SetCapFrameCallback(value:TVideoStream);
     procedure SetCapError(value:TError);
-
+    procedure CreateImgForPreview;
+    procedure DestroyImgForPreview;
+    function IsImgForPreviewMode: Boolean;
+    procedure SavePreviewToMemory;
+    procedure MoveCapOut;
   public
      procedure SetDriverName(value:String);
      constructor Create(AOwner: TComponent); override;
@@ -156,6 +166,10 @@ type
     function CapSingleFramesClose:boolean;
     function CapSingleFrame:boolean;
     function IsBitmapHeaderSupport(Header:TBitmapInfoHeader): Boolean;
+    procedure TestCurrentFormat;
+    function IsCurrentFormatNotSupport: Boolean;
+    function CurrentIsBitmapFormat: Boolean;
+    function IsNeedFixData: Boolean;
  published
    property align;
    property color;
@@ -166,7 +180,8 @@ type
    property VideoOverlay:boolean read GetOverlay write SetOverlay;
    property VideoPreview:boolean read GetPreview write SetPreview;
    property PreviewScaleToWindow:boolean read fscale write Setscale;
-   property PreviewScaleProportional:boolean read  fprop write Setprop;
+   property PreviewScaleProportional:boolean read fprop write Setprop;
+   property PreviewfCenterToWindows: Boolean read fCenter write SetCenter;
    property PreviewRate:word read fpreviewrate write SetpreviewRate;
    property MicroSecPerFrame:cardinal read  fmicrosecpframe write SetMicroSecPerFrame;
    property FrameRate:word read  getFramerate write setFrameRate;
@@ -191,6 +206,60 @@ type
    Property OnDblClick;
  end;
 
+ const Jpeg_default_dht: array of byte = [
+      $ff,$c4,
+      //* DHT (Define Huffman Table) identifier */
+      $01,$a2,
+      //* section size: $01a2, from this two bytes to the end, inclusive */
+      $00,
+      //* DC Luminance */
+      $00,$01,$05,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,
+      //* BITS         */
+      $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,
+      //* HUFFVALS     */
+      $10,
+      //* AC Luminance */
+      $00,$02,$01,$03,$03,$02,$04,$03,$05,$05,$04,$04,$00,$00,$01,$7d,
+      //* BITS         */
+      $01,$02,$03,$00,$04,$11,$05,$12,$21,$31,$41,$06,$13,$51,$61,$07,
+      //* HUFFVALS     */
+      $22,$71,$14,$32,$81,$91,$a1,$08,$23,$42,$b1,$c1,$15,$52,$d1,$f0,
+      $24,$33,$62,$72,$82,$09,$0a,$16,$17,$18,$19,$1a,$25,$26,$27,$28,
+      $29,$2a,$34,$35,$36,$37,$38,$39,$3a,$43,$44,$45,$46,$47,$48,$49,
+      $4a,$53,$54,$55,$56,$57,$58,$59,$5a,$63,$64,$65,$66,$67,$68,$69,
+      $6a,$73,$74,$75,$76,$77,$78,$79,$7a,$83,$84,$85,$86,$87,$88,$89,
+      $8a,$92,$93,$94,$95,$96,$97,$98,$99,$9a,$a2,$a3,$a4,$a5,$a6,$a7,
+      $a8,$a9,$aa,$b2,$b3,$b4,$b5,$b6,$b7,$b8,$b9,$ba,$c2,$c3,$c4,$c5,
+      $c6,$c7,$c8,$c9,$ca,$d2,$d3,$d4,$d5,$d6,$d7,$d8,$d9,$da,$e1,$e2,
+      $e3,$e4,$e5,$e6,$e7,$e8,$e9,$ea,$f1,$f2,$f3,$f4,$f5,$f6,$f7,$f8,
+      $f9,$fa,
+      $01,
+      //* DC Chrominance */
+      $00,$03,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,
+      //* BITS           */
+      $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,
+      //* HUFFVALS       */
+      $11,
+      //* AC Chrominance */
+      $00,$02,$01,$02,$04,$04,$03,$04,$07,$05,$04,$04,$00,$01,$02,$77,
+      //* BITS           */
+      $00,$01,$02,$03,$11,$04,$05,$21,$31,$06,$12,$41,$51,$07,$61,$71,
+      //* HUFFVALS       */
+      $13,$22,$32,$81,$08,$14,$42,$91,$a1,$b1,$c1,$09,$23,$33,$52,$f0,
+      $15,$62,$72,$d1,$0a,$16,$24,$34,$e1,$25,$f1,$17,$18,$19,$1a,$26,
+      $27,$28,$29,$2a,$35,$36,$37,$38,$39,$3a,$43,$44,$45,$46,$47,$48,
+      $49,$4a,$53,$54,$55,$56,$57,$58,$59,$5a,$63,$64,$65,$66,$67,$68,
+      $69,$6a,$73,$74,$75,$76,$77,$78,$79,$7a,$82,$83,$84,$85,$86,$87,
+      $88,$89,$8a,$92,$93,$94,$95,$96,$97,$98,$99,$9a,$a2,$a3,$a4,$a5,
+      $a6,$a7,$a8,$a9,$aa,$b2,$b3,$b4,$b5,$b6,$b7,$b8,$b9,$ba,$c2,$c3,
+      $c4,$c5,$c6,$c7,$c8,$c9,$ca,$d2,$d3,$d4,$d5,$d6,$d7,$d8,$d9,$da,
+      $e2,$e3,$e4,$e5,$e6,$e7,$e8,$e9,$ea,$f2,$f3,$f4,$f5,$f6,$f7,$f8,
+      $f9,$fa];
+
+const Jpeg_default_sio: array of byte = [$FF, $D8];
+const Jpeg_default_app0: array of byte = [
+      $FF, $E0, $00, $10, $4A, $46, $49, $46, $00, $01, $01, $01, $00, $60, $00, $60, $00, $00];
+
 
 function GetDriverList: TStringList;
 procedure FrameToBitmap(Bitmap:TBitmap;FrameBuffer:pointer; BitmapInfo:TBitmapInfo);
@@ -200,7 +269,7 @@ function GetVideoCapDeviceNameByDriverIndex(const DriverIndex: Cardinal; Display
 
 implementation
 
-uses Registry;
+uses Registry, Clipbrd;
 
 function GetDeviceDisplayName(FullName: string): string;
 var
@@ -378,7 +447,7 @@ begin
   Result := GetBitmapInfoHeader(BI_RGB, Width, Height, 32);
 end;
 
-function StatusCallbackProc(hWnd : HWND; nID : Integer; lpsz : Pchar): LongInt; stdcall;
+function StatusCallbackProc(hWnd : HWND; nID : Integer; lpsz : Pchar): LRESULT; stdcall;
 var
     Control:TVideoCap;
 begin
@@ -391,7 +460,7 @@ begin
 end;
 
 // Callback para video stream
-function VideoStreamCallbackProc(hWnd:Hwnd; lpVHdr:PVIDEOHDR):longint; stdcall;
+function VideoStreamCallbackProc(hWnd:Hwnd; lpVHdr:PVIDEOHDR):LRESULT; stdcall;
  var
     Control:TVideoCap;
 begin
@@ -403,19 +472,211 @@ begin
     Result:= 1;
 end;
 
-function FrameCallbackProc(hwnd:Hwnd; lpvhdr:PVideoHdr):longint;stdcall;
+function FindJPEGSectionType(TypeList: array of UInt8; AType: UInt8): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := Low(TypeList) to High(TypeList) do
+  begin
+    if TypeList[I] = AType then
+    begin
+      Result := True;
+      break;
+    end;
+  end;
+end;
+
+function FrameCallbackProc(hwnd:Hwnd; lpvhdr:PVideoHdr):LRESULT;stdcall;
 var
     Control:TVideoCap;
+  S: UInt16;
+  C,
+  I: Integer;
+  T: UInt8;
+  bmpInfo: TBitmapInfo;
+  Bmpfilehd: BITMAPFILEHEADER;
+  BeginIndex: Integer;
+  EndIndex: Integer;
 begin
     Control:= TVideoCap(capGetUserData(hwnd));
     if Assigned(Control) then begin
-        if Assigned(Control.fcapFrameCallback ) then
-            Control.fcapFrameCallback(control,lpvHdr);
+      if (lpvhdr <> nil) and (lpvhdr.dwBytesUsed <> 0) and Control.IsNeedFixData then
+      begin
+//        FillMemory(@bihIn, Sizeof(BITMAPINFOHEADER), 0);
+//        FillMemory(@bihOut, Sizeof(BITMAPINFOHEADER), 0);
+//        bihIn := bmpInfo.bmiHeader;
+//        bihIn.biWidth := 0;
+//        bihIn.biHeight := 0;
+//        bihIn.biSizeImage := 0;
+//        bihOut.biPlanes := 1;
+//        bihOut.biSize := SizeOf(BITMAPINFOHEADER);
+//        bihOut.biWidth := bihIn.biWidth;
+//        bihOut.biHeight := bihIn.biHeight;
+//        bihOut.biPlanes := 1;
+//        bihOut.biCompression := BI_RGB24;
+//        bihOut.biBitCount := 24;
+//        bihOut.biSizeImage := bihIn.biSizeImage;
+//        aHIC := ICLocate(ICTYPE_VIDEO, 0, Addr(bihIn), Addr(bihOut), ICMODE_DECOMPRESS);
+//        if (aHIC <> 0) then
+//        try
+//          if (ICDecompressBegin(aHIC, Addr(bihIn), Addr(bihOut)) = ICERR_OK) then
+//          begin
+//            try
+//              Buf := GetMemory(bmpInfo.bmiHeader.biSizeImage);
+//              try
+//                if (ICDecompress(aHIC, 0, Addr(bihIn), lpVhdr.lpData, Addr(bihOut), Buf) = ICERR_OK) then
+//                begin
+//                  bmpInfo.bmiHeader := bihOut;
+//                  GetWindowRect(Capture.Handle, WndRect);
+//                  pDC := GetDC(Capture.Handle);
+//                  MemDC := CreateCompatibleDC(pDC);
+//                  bmp := CreateCompatibleBitmap(MemDC, bmpInfo.bmiHeader.biWidth, bmpInfo.bmiHeader.biHeight);
+//                  pOldBmp := HGDIOBJ(Addr(bmp));
+//                  pOldBmp := SelectObject(MemDC, pOldBmp);
+//                  SetDIBitsToDevice(MemDC, 0, 0, bmpInfo.bmiHeader.biWidth, bmpInfo.bmiHeader.biHeight, 0, 0, 0,
+//                    bmpInfo.bmiHeader.biHeight, Buf, &bmpInfo, DIB_RGB_COLORS);
+//                  BitBlt(pDC, 0, 0, WndRect.Width, WndRect.Height, &MemDC, 0, 0, SRCCOPY);
+//                end;
+//              finally
+//                FreeMemory(Buf);
+//              end;
+//            finally
+//              ICDecompressEnd(aHIC);
+//            end;
+//          end;
+//       finally
+//          ICClose(aHIC);
+//        end;;
+//        fccType := ICTYPE_VIDEO;
+//        I := 0;
+//        While ICInfo(fccType, I, Addr(AICINFO)) do
+//        begin
+//          Inc(I);
+//          aHIC := ICOpen(AICINFO.fccType, AICINFO.fccHandler, ICMODE_QUERY);
+//          if (aHIC <> 0) then
+//          try
+//            ICGetInfo(aHIC, Addr(AICINFO), SizeOf(TICINFO));
+//            ShowMessage(AICINFO.szDescription);
+//          finally
+//            ICClose(aHIC);
+//          end;
+//        end;
+        bmpInfo := Control.BitMapInfo;
+        if bmpInfo.bmiHeader.biCompression = BI_MJPG then
+        begin
+          SetLength(Control.FJPEGSectionTypeList, 0);
+          I := 2;
+          C := 0;
+          while (I < lpvhdr.dwBytesUsed) do
+          begin
+            while (I < lpvhdr.dwBytesUsed) do
+            begin
+              if lpvhdr.lpData[I] = $FF then
+              begin
+                Inc(I);
+                break;
+              end;
+              Inc(I);
+            end;
+            T := lpvhdr.lpData[I];
+            Inc(C);
+            Inc(I);
+            WordRec(S).Hi := lpvhdr.lpData[I];
+            Inc(I);
+            WordRec(S).Lo := lpvhdr.lpData[I];
+            Inc(I, S - 1);
+          end;
+          SetLength(Control.FJPEGSectionTypeList, C);
+          I := 2;
+          C := 0;
+          while (I < lpvhdr.dwBytesUsed) do
+          begin
+            while (I < lpvhdr.dwBytesUsed) do
+            begin
+              if lpvhdr.lpData[I] = $FF then
+              begin
+                Inc(I);
+                break;
+              end;
+              Inc(I);
+            end;
+            T := lpvhdr.lpData[I];
+            Control.FJPEGSectionTypeList[C] := T;
+            Inc(C);
+            Inc(I);
+            WordRec(S).Hi := lpvhdr.lpData[I];
+            Inc(I);
+            WordRec(S).Lo := lpvhdr.lpData[I];
+            Inc(I, S - 1);
+          end;
+          BeginIndex := 0;
+          EndIndex := lpVhdr.dwBytesUsed - 2;
+          //https://blog.csdn.net/yangysng07/article/details/9025443
+          for I := 0 to lpVhdr.dwBytesUsed div 2 - 1 do
+          begin
+            //找到 DQT;
+            if (lpVhdr.lpData[I * 2] = $FF) and (lpVhdr.lpData[I * 2 + 1] = $DB) then
+            begin
+              BeginIndex := I * 2;
+              break;
+            end;
+          end;
+          EndIndex := BeginIndex;
+          for I := lpVhdr.dwBytesUsed - 2 downto 0 do
+          begin
+            if (lpVhdr.lpData[I] = $FF) and (lpVhdr.lpData[I + 1] = $D9) then
+            begin
+              EndIndex := I;
+              break;
+            end;
+          end;
+          if (EndIndex <> BeginIndex) or (EndIndex - BeginIndex + 2 <> 0) then
+          begin
+            Control.FMemorForPreview.Position := 0;
+            //写入 JPEG_SIO
+            Control.FMemorForPreview.Write(Jpeg_default_sio[0], Length(Jpeg_default_sio));
+            if not FindJPEGSectionType(Control.FJPEGSectionTypeList, $D8) then
+            begin
+              //写入 JPEG_APP0
+              Control.FMemorForPreview.Write(Jpeg_default_app0[0], Length(Jpeg_default_app0));
+            end;
+            if not FindJPEGSectionType(Control.FJPEGSectionTypeList, $C4) then
+            begin
+              //写入 JPEG_DHT
+              Control.FMemorForPreview.Write(Jpeg_default_dht[0], Length(Jpeg_default_dht));
+            end;
+            Control.FMemorForPreview.Write(lpVhdr.lpData[BeginIndex], EndIndex - BeginIndex + 2);
+            Control.FMemorForPreview.Size := Control.FMemorForPreview.Position;
+            Control.SavePreviewToMemory;
+          end;
+        end
+//      else if Control.CurrentIsBitmapFormat then
+//      begin
+//        Bmpfilehd.bfType := $DBFF;
+//        Bmpfilehd.bfSize := lpVhdr.dwBytesUsed + SizeOf(Bmpfilehd) + SizeOf(bmpInfo.bmiHeader);
+//        Bmpfilehd.bfReserved1 := 0;
+//        Bmpfilehd.bfReserved2 := 0;
+//        Bmpfilehd.bfOffBits := SizeOf(Bmpfilehd) + SizeOf(bmpInfo.bmiHeader);
+//        Control.FMemorForPreview.Position := 0;
+//        Control.FMemorForPreview.Write(Bmpfilehd, SizeOf(Bmpfilehd));
+//        Control.FMemorForPreview.Write(bmpInfo.bmiHeader, SizeOf(bmpInfo.bmiHeader));
+//        Control.FMemorForPreview.Write(lpVhdr.lpData[0], lpVhdr.dwBytesUsed);
+//        Control.FMemorForPreview.Size := Control.FMemorForPreview.Position;
+//        Control.SavePreviewToMemory;
+//      end
+        else
+        begin
+          Control.DestroyImgForPreview;
+        end;
+      end;
+          if Assigned(Control.fcapFrameCallback ) then
+              Control.fcapFrameCallback(control,lpvHdr);
     end;
     Result:= 1;
 end;
 
-function AudioStreamCallbackProc(hwnd:HWND;lpWHdr:PWaveHdr):longInt; stdcall;
+function AudioStreamCallbackProc(hwnd:HWND;lpWHdr:PWaveHdr):LRESULT; stdcall;
 var
     Control: TVideoCap;
 begin
@@ -428,7 +689,7 @@ begin
 end;
 
 
-function ErrorCallbackProc(hwnd:HWND;nId:integer;lzError:Pchar):longint;stdcall;
+function ErrorCallbackProc(hwnd:HWND;nId:integer;lzError:Pchar):LRESULT;stdcall;
 var
     Control:TVideoCap;
 begin
@@ -442,19 +703,19 @@ end;
 
 
 
-function WCapproc(hw:THandle;messa:DWord; w:wParam; l:lParam):integer;stdcall;
+function WCapproc(hw:HWND;messa:UINT; w:wParam; l:lParam):LRESULT;stdcall;
  var
-    oldwndProc:Pointer;
-    parentWnd:Thandle;
+    oldwndProc:TFNWndProc;
+    parentWnd:HWND;
  begin
-    oldwndproc:=Pointer(GetWindowLong(hw,GWL_USERDATA));
+    oldwndproc:=TFNWndProc(GetWindowLong(hw,GWL_USERDATA));
     case Messa of
      WM_MOUSEMOVE,
      WM_LBUTTONDBLCLK,
      WM_LBUTTONDOWN,WM_RBUTTONDOWN,WM_MBUTTONDOWN ,
      WM_LBUTTONUP,WM_RBUTTONUP,WM_MBUTTONUP:
        begin
-        ParentWnd:=Thandle(GetWindowLong(hw,GWL_HWNDPARENT));
+        ParentWnd:=HWND(GetWindowLong(hw,GWL_HWNDPARENT));
         sendMessage(ParentWnd,messa,w,l);
         result := integer(true);
        end
@@ -488,6 +749,13 @@ begin
     fcapVideoStream         := nil;
     fcapAudioStream         := nil;
     FAudioformat:= TAudioFormat.Create;
+
+    fCenter := False;
+    FImgForPreview := nil;
+    FMemorForPreview := TMemoryStream.Create;
+    SetLength(FJPEGSectionTypeList, 0);
+    FControlForPreview := nil;
+    DestroyImgForPreview;
 end;
 
 Destructor TVideoCap.destroy;
@@ -495,23 +763,142 @@ Begin
     DestroyCapWindow;
     deleteDriverProps;
     fAudioformat.free;
+  SetLength(FJPEGSectionTypeList, 0);
+  FreeAndNil(FMemorForPreview);
+  FreeAndNil(FImgForPreview);
+  FreeAndNil(FControlForPreview);
     inherited destroy;
+end;
+
+function TVideoCap.CurrentIsBitmapFormat: Boolean;
+var
+  Bh: TBitmapInfoHeader;
+begin
+  Result := False;
+  if not DriverOpen then exit;
+  Bh := BitMapInfoHeader;
+  Result := (Bh.biCompression = BI_RGB) or
+          (Bh.biCompression = BI_RGB1) or
+          (Bh.biCompression = BI_RGB4) or
+          (Bh.biCompression = BI_RGB8) or
+          (Bh.biCompression = BI_RGB565) or
+          (Bh.biCompression = BI_RGB555) or
+          (Bh.biCompression = BI_RGB24) or
+          (Bh.biCompression = BI_ARGB32) or
+          (Bh.biCompression = BI_RGB32);
+end;
+
+function TVideoCap.IsNeedFixData: Boolean;
+var
+  Bh: TBitmapInfoHeader;
+begin
+  Result := False;
+  if not DriverOpen then exit;
+  Bh := BitMapInfoHeader;
+//  if (Bh.biCompression = BI_YUY2) or
+//    (Bh.biCompression = BI_RGB24) or
+//    (Bh.biCompression = BI_RGB32) or
+//    (Bh.biCompression = BI_RGB) or
+//    (Bh.biCompression = BI_YUYV) then
+//  begin
+//  end
+//  else
+//  begin
+//
+//  end;
+  Result := Bh.biCompression = BI_MJPG; // or more.
+end;
+
+procedure TVideoCap.MoveCapOut;
+begin
+  MoveWindow(fhcapWnd, ClientRect.Left + 1 - Capwidth, ClientRect.Top + 1 - capheight, Capwidth, capheight, True);
+  capPreviewScale(fhCapWnd, False);
+end;
+
+procedure TVideoCap.SavePreviewToMemory;
+begin
+  CreateImgForPreview;
+  FMemorForPreview.Position := 0;
+  FImgForPreview.AutoSize := True;
+  FImgForPreview.Center := False;
+  FImgForPreview.Stretch := False;
+  FImgForPreview.Proportional := True;
+  FImgForPreview.Picture.LoadFromStream(FMemorForPreview);
+  FImgForPreview.AutoSize := False;
+  FImgForPreview.Proportional := fprop;
+  FImgForPreview.Stretch := fscale;
+  FImgForPreview.Center := fCenter;
+//  FMemorForPreview.Position := 0;
+//  FMemorForPreview.SaveToFile('c:\a.jpg');
+end;
+
+procedure TVideoCap.CreateImgForPreview;
+begin
+  if (not (csDestroying in ComponentState)) then
+  begin
+    if (FImgForPreview = nil) then
+    begin
+      FImgForPreview := TImage.Create(Owner);
+      FImgForPreview.AutoSize := False;
+      FImgForPreview.Parent := Self;
+      FImgForPreview.BoundsRect := ClientRect;
+      FImgForPreview.Align := alClient;
+      DoubleBuffered := True;
+      FControlForPreview.Align := alNone;
+      //Must Show.
+      FControlForPreview.SetBounds(ClientRect.Left, ClientRect.Top, 10, 10);
+      SetWindowPos(FControlForPreview.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE or SWP_NOMOVE);
+      MoveCapOut;
+    end;
+    FImgForPreview.Center := fCenter;
+    FImgForPreview.Proportional := fprop;
+    FImgForPreview.Stretch := fscale;
+  end;
+end;
+
+procedure TVideoCap.DestroyImgForPreview;
+begin
+  if (not (csDestroying in ComponentState)) then
+  begin
+    if (FControlForPreview = nil) then
+    begin
+      FControlForPreview := TCustomControl.Create(Owner);
+      FControlForPreview.Parent := Self;
+      FControlForPreview.BoundsRect := ClientRect;
+      SetWindowPos(FControlForPreview.Handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE or SWP_NOMOVE);
+    end;
+    FControlForPreview.Align := alClient;
+    FControlForPreview.BringToFront;
+    FreeAndNil(FImgForPreview);
+    SizeCap;
+  end;
+end;
+
+function TVideoCap.IsImgForPreviewMode: Boolean;
+begin
+  Result := (FImgForPreview <> nil);
 end;
 
 procedure TVideoCap.SetSize(var msg:TMessage);
 begin
-    if (fhCapWnd <> 0) and (Fscale) then begin
+    if (fhCapWnd <> 0) and (Fscale or fCenter) then begin
         if msg.msg = WM_SIZE then SizeCap;
     end;
 end;
 
-
 procedure TVideoCap.SizeCap;
 var
-    h,w:integer;
+    h, w: integer;
     f,cf:single;
 begin
-    if not fscale then MoveWindow(fhcapWnd,0,0,Capwidth,capheight,true) else begin
+  if IsImgForPreviewMode then exit;
+    if not fscale then
+    begin
+      h := CapHeight;
+      w := CapWidth;
+    end
+    else
+    begin
         if fprop then begin
             f:= Width/height;
             cf:= CapWidth/CapHeight;
@@ -526,7 +913,15 @@ begin
             h:= height;
             w:= Width;
        end;
-       MoveWindow(fhcapWnd,0,0,w, h,true);
+    end;
+    if fCenter then
+    begin
+      MoveWindow(fhcapWnd, (ClientRect.Width - w) div 2,
+        (ClientRect.Height - h) div 2, w, h, True);
+    end
+    else
+    begin
+      MoveWindow(fhcapWnd,0, 0 , w, h, True);
     end;
 end;
 
@@ -786,8 +1181,9 @@ end;
 function TVideoCap.CreateCapWindow;
 var
     Ex:Exception;
-    savewndproc:integer;
-    Bh: TBitmapInfoHeader;
+    savewndproc:NativeInt;
+//    Bh: TBitmapInfoHeader;
+  IsFrameCallbacked: Boolean;
 begin
     if fhCapWnd <> 0 then begin
       result:= true;
@@ -807,7 +1203,7 @@ begin
     fhCapWnd :=
     capCreateCaptureWindow( PChar(Name),
         WS_CHILD or WS_VISIBLE , 0, 0,
-            Width, Height, Handle, 5001);
+            Width, FControlForPreview.Height, Handle, 5001);
     if fhCapWnd =0 then begin
        Ex:= ENoCapWindowException.Create('Cannot create the Capture window');
        GetDriverStatus(true);
@@ -826,7 +1222,12 @@ begin
     SetWindowLong(fhcapWnd,GWL_USERDATA,savewndProc);
 
     if assigned(fcapStatusCallBack ) then capSetCallbackOnStatus(fhcapWnd , @StatusCallbackProc);
-    if assigned(fcapFrameCallback) then capSetCallbackOnFrame(fhcapWnd, @FrameCallbackProc);
+    IsFrameCallbacked := True;
+    if assigned(fcapFrameCallback) then
+    begin
+      capSetCallbackOnFrame(fhcapWnd, @FrameCallbackProc);
+      IsFrameCallbacked := True;
+    end;
     if assigned(fcapError) then capSetCallbackOnError(fhcapWnd, @ErrorCallBackProc);
     if assigned(fcapVideoStream) then capSetCallbackOnVideoStream(fhcapwnd, @VideoStreamCallbackProc);
     if assigned(fcapAudioStream) then capSetCallbackOnWaveStream(fhcapWnd, @AudioStreamCallbackProc);
@@ -841,39 +1242,50 @@ begin
         end;
         exit;
     end;
+    if (not IsFrameCallbacked) or IsNeedFixData then
+    begin
+      capSetCallbackOnFrame(fhcapWnd, @FrameCallbackProc);
+      IsFrameCallbacked := True;
+    end;
+
 
     CreateTmpFile(True);
     capPreviewScale(fhCapWnd, fscale);
     capPreviewRate(fhCapWnd, round( 1000/fpreviewrate));
-    Bh := BitMapInfoHeader;
-    if (bh.biCompression = BI_YUY2) or
-      (bh.biCompression = BI_RGB24) or
-      (bh.biCompression = BI_RGB32) or
-      (bh.biCompression = BI_RGB) or
-      (bh.biCompression = BI_YUYV) then
-    begin
-    end
-    else
-    begin
-      Bh := GetYUY2BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
-        if IsBitmapHeaderSupport(Bh) then
-          BitMapInfoHeader := Bh;
-      Bh := GetYUYVBitmapInfoHeader(Bh.biWidth, Bh.biHeight);
-        if IsBitmapHeaderSupport(Bh) then
-          BitMapInfoHeader := Bh;
-      Bh := GetYUY2BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
-        if IsBitmapHeaderSupport(Bh) then
-          BitMapInfoHeader := Bh;
-      Bh := GetRGB24BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
-        if IsBitmapHeaderSupport(Bh) then
-          BitMapInfoHeader := Bh;
-      Bh := GetRGBBitmapInfoHeader(Bh.biWidth, Bh.biHeight);
-        if IsBitmapHeaderSupport(Bh) then
-          BitMapInfoHeader := Bh;
-      Bh := GetRGB32BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
-        if IsBitmapHeaderSupport(Bh) then
-          BitMapInfoHeader := Bh;
-    end;
+//    Bh := BitMapInfoHeader;
+//    if (Bh.biCompression = BI_YUY2) or
+//      (Bh.biCompression = BI_RGB24) or
+//      (Bh.biCompression = BI_RGB32) or
+//      (Bh.biCompression = BI_RGB) or
+//      (Bh.biCompression = BI_YUYV) then
+//    begin
+//    end
+//    else
+//    begin
+//      Bh := GetYUY2BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
+//        if IsBitmapHeaderSupport(Bh) then
+//          BitMapInfoHeader := Bh;
+//      Bh := GetYUYVBitmapInfoHeader(Bh.biWidth, Bh.biHeight);
+//        if IsBitmapHeaderSupport(Bh) then
+//          BitMapInfoHeader := Bh;
+//      Bh := GetYUY2BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
+//        if IsBitmapHeaderSupport(Bh) then
+//          BitMapInfoHeader := Bh;
+//      Bh := GetRGB24BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
+//        if IsBitmapHeaderSupport(Bh) then
+//          BitMapInfoHeader := Bh;
+//      Bh := GetRGBBitmapInfoHeader(Bh.biWidth, Bh.biHeight);
+//        if IsBitmapHeaderSupport(Bh) then
+//          BitMapInfoHeader := Bh;
+//      Bh := GetRGB32BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
+//        if IsBitmapHeaderSupport(Bh) then
+//          BitMapInfoHeader := Bh;
+//      Bh := BitMapInfoHeader;
+//      if Bh.biCompression = BI_MJPG  then
+//      begin
+//        //目前不支持。
+//      end;
+//    end;
     GetDriverStatus(true);
     Sizecap;
     result:= true;
@@ -940,6 +1352,7 @@ begin
   CapDriverDisconnect(fhCapWnd);
   SetWindowLong(fhcapWnd,GWL_WNDPROC,GetWindowLong(fhcapwnd,GWL_USERDATA));
   DestroyWindow( fhCapWnd ) ;
+  DestroyImgForPreview;
   fhCapWnd := 0;
 end;
 
@@ -1069,6 +1482,11 @@ var
 begin
     result:= false;
    if not DriverOpen then exit;
+   if IsImgForPreviewMode then
+   begin
+     FImgForPreview.Picture.SaveToFile(fCapSingleImageFileName);
+     exit;
+   end;
    result := capFileSaveDIB(fhcapwnd,strpCopy(s,fCapSingleImageFileName));
 end;
 
@@ -1076,6 +1494,11 @@ function  TVideoCap.SaveToClipboard:boolean;
 begin
     result:= false;
     if not Driveropen then exit;
+    if IsImgForPreviewMode then
+   begin
+     Clipboard.Assign(FImgForPreview.Picture);
+     exit;
+   end;
     result:= capeditCopy(fhcapwnd);
 end;
 
@@ -1107,11 +1530,36 @@ begin
         else Result:= fpDriverStatus^.fOverlayWindow;
 end;
 
+function TVideoCap.IsCurrentFormatNotSupport: Boolean;
+begin
+  Result := False;
+  exit;
+  if not DriverOpen then exit;
+  Result := BitMapInfoHeader.biCompression = BI_MJPG;
+end;
+
+procedure TVideoCap.TestCurrentFormat;
+var
+  Ex: Exception;
+begin
+  if not DriverOpen then exit;
+    if IsCurrentFormatNotSupport then
+    begin
+      Ex:= EFalseFormat.Create('Current format not supported');
+      if not (csDesigning in ComponentState) then
+      begin
+        raise Ex;
+      end;
+      exit;
+    end;
+end;
+
 procedure TVideoCap.SetPreview(value:boolean);
 begin
     if value = GetPreview then exit;
     if value = true then
     if fhcapWnd = 0 then  CreateCapWindow;
+    TestCurrentFormat;
     capPreview(fhCapWnd,value);
     GetDriverStatus(true);
     invalidate;
@@ -1230,18 +1678,49 @@ begin
     if value = fscale then  exit;
     fscale:= value;
     if DriverOpen then begin
-        capPreviewScale(fhCapWnd, fscale);
-        SizeCap;
+        if IsImgForPreviewMode then
+        begin
+          FImgForPreview.Stretch := fscale;
+        end
+        else
+        begin
+          capPreviewScale(fhCapWnd, fscale);
+          SizeCap;
+          Repaint;
+        end;
     end;
-    Repaint;
 end;
 
 Procedure TVideoCap.Setprop(value:Boolean);
 begin
     if value = fprop then exit;
     fprop:=value;
-    if DriverOpen then Sizecap;
+    if DriverOpen then
+      if IsImgForPreviewMode then
+      begin
+        FImgForPreview.Proportional := fprop;
+      end
+      else
+      begin
+        Sizecap;
+        Repaint;
+      end;
+end;
+
+procedure TVideoCap.SetCenter (Value: Boolean);
+begin
+  if fCenter = Value then exit;
+  fCenter := Value;
+  if DriverOpen then
+  if IsImgForPreviewMode then
+  begin
+    FImgForPreview.Center := fCenter;
+  end
+  else
+  begin
+    Sizecap;
     Repaint;
+  end;
 end;
 
 function TVideoCap.GetCapWidth;

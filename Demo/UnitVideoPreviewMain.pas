@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics,
   Controls, Forms, Dialogs, Videocap, StdCtrls, Buttons,
-  Spin, vfw;
+  Spin, vfw, ExtCtrls;
 
 type
   TFormMain = class(TForm)
@@ -20,6 +20,10 @@ type
     BitBtnChangeFormat: TBitBtn;
     BitBtnChangeDispaly: TBitBtn;
     BitBtnChangeCompression: TBitBtn;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    BitBtnSaveToClipboard: TBitBtn;
     procedure cbxCaptureDriverChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -28,6 +32,10 @@ type
     procedure BitBtnChangeFormatClick(Sender: TObject);
     procedure BitBtnChangeDispalyClick(Sender: TObject);
     procedure BitBtnChangeCompressionClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure BitBtnSaveToClipboardClick(Sender: TObject);
   private
     { Private declarations }
     FisShowing: Boolean;
@@ -53,7 +61,7 @@ begin
     end
     else
     begin
-      BitBtnVideoPreview.Caption := 'StarePreview';
+      BitBtnVideoPreview.Caption := 'StartPreview';
     end;
     if cbxCaptureDriver.ItemIndex >= 0 then
     begin
@@ -64,13 +72,14 @@ begin
       LabelCurVIDCap.Text := 'NA';
       Capture.VideoPreview := False;
       Capture.DriverOpen := False;
-      BitBtnVideoPreview.Caption := 'StarePreview';
+      BitBtnVideoPreview.Caption := 'StartPreview';
     end;
     BitBtnChangeVidCap.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgSource;
     BitBtnChangeFormat.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgFormat;
     BitBtnVideoPreview.Enabled := (cbxCaptureDriver.ItemIndex >= 0);
     BitBtnChangeDispaly.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgDisplay;
     BitBtnChangeCompression.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgFormat;
+    BitBtnSaveToClipboard.Enabled := Capture.VideoPreview;
   end;
 end;
 
@@ -158,6 +167,11 @@ begin
   end;
 end;
 
+procedure TFormMain.BitBtnSaveToClipboardClick(Sender: TObject);
+begin
+  Capture.SaveToClipboard;
+end;
+
 procedure TFormMain.BitBtnVideoPreviewClick(Sender: TObject);
 var
   sHint: string;
@@ -173,6 +187,8 @@ begin
       Capture.VideoPreview := False;
       Capture.DriverOpen := True;
       Capture.VideoPreview := True;
+      if Capture.HasVideoOverlay then
+        Capture.VideoOverlay := True;
       {
       if Capture.CapWidth > Capture.CapHeight then
       begin
@@ -184,20 +200,45 @@ begin
       end;
       //}
     except
-      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
-        'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
-        'Please make sure that the device is in available state.';
-      Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+      on E: EFalseFormat do
+      begin
+        sHint := 'The current format not support, please click ChangeFormat button.';
+        Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+        exit;
+      end;
+      else
+      begin
+        sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+          'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
+          'Please make sure that the device is in available state.';
+        Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+      end;
     end;
   end;
+  BitBtnSaveToClipboard.Enabled := Capture.VideoPreview;
   if Capture.VideoPreview then
   begin
     BitBtnVideoPreview.Caption := 'StopPreview';
   end
   else
   begin
-    BitBtnVideoPreview.Caption := 'StarePreview';
+    BitBtnVideoPreview.Caption := 'StartPreview';
   end;
+end;
+
+procedure TFormMain.Button1Click(Sender: TObject);
+begin
+  Capture.PreviewScaleToWindow := not Capture.PreviewScaleToWindow;
+end;
+
+procedure TFormMain.Button2Click(Sender: TObject);
+begin
+  Capture.PreviewScaleProportional := not Capture.PreviewScaleProportional;
+end;
+
+procedure TFormMain.Button3Click(Sender: TObject);
+begin
+  Capture.PreviewfCenterToWindows := not Capture.PreviewfCenterToWindows;
 end;
 
 end.
