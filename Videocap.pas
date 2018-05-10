@@ -57,6 +57,7 @@ TAudioFormat = class (TPersistent)
 type
   TVideoCap = class(TCustomControl)
   private
+    FAutoSelectYUY2: Boolean;
     FJPEGSectionTypeList: array of UInt8;
     FMemorForPreview: TMemoryStream;
     FImgForPreview: TImage;
@@ -98,7 +99,8 @@ type
    function GetOverlay: Boolean;
    procedure SizeCap;
    procedure Setprop (value: Boolean);
-   procedure SetCenter (Value: Boolean);
+   procedure SetCenter(Value: Boolean);
+   procedure SetAutoSelectYUY2(Value: Boolean);
    procedure SetMicroSecPerFrame(value: Cardinal);
    procedure setFrameRate (value: Word);
    function  GetFrameRate: Word;
@@ -170,6 +172,7 @@ type
     function IsCurrentFormatNotSupport: Boolean;
     function CurrentIsBitmapFormat: Boolean;
     function IsNeedFixData: Boolean;
+    function TrySelectYUY2: Boolean;
  published
    property align;
    property color;
@@ -182,6 +185,7 @@ type
    property PreviewScaleToWindow:boolean read fscale write Setscale;
    property PreviewScaleProportional:boolean read fprop write Setprop;
    property PreviewfCenterToWindows: Boolean read fCenter write SetCenter;
+   Property AutoSelectYUY2: Boolean read FAutoSelectYUY2 write SetAutoSelectYUY2;
    property PreviewRate:word read fpreviewrate write SetpreviewRate;
    property MicroSecPerFrame:cardinal read  fmicrosecpframe write SetMicroSecPerFrame;
    property FrameRate:word read  getFramerate write setFrameRate;
@@ -751,6 +755,7 @@ begin
     FAudioformat:= TAudioFormat.Create;
 
     fCenter := False;
+    FAutoSelectYUY2 := True;
     FImgForPreview := nil;
     FMemorForPreview := TMemoryStream.Create;
     SetLength(FJPEGSectionTypeList, 0);
@@ -1286,6 +1291,7 @@ begin
 //        //目前不支持。
 //      end;
 //    end;
+    TrySelectYUY2;
     GetDriverStatus(true);
     Sizecap;
     result:= true;
@@ -1707,7 +1713,7 @@ begin
       end;
 end;
 
-procedure TVideoCap.SetCenter (Value: Boolean);
+procedure TVideoCap.SetCenter(Value: Boolean);
 begin
   if fCenter = Value then exit;
   fCenter := Value;
@@ -1721,6 +1727,31 @@ begin
     Sizecap;
     Repaint;
   end;
+end;
+
+function TVideoCap.TrySelectYUY2: Boolean;
+var
+  Bh: TBitmapInfoHeader;
+begin
+  Result := False;
+  if not DriverOpen then exit;
+  if FAutoSelectYUY2 then
+  begin
+    Bh := GetYUY2BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
+    Result := IsBitmapHeaderSupport(Bh);
+    if Result then
+    begin
+      BitMapInfoHeader := Bh;
+    end;
+  end;
+end;
+
+procedure TVideoCap.SetAutoSelectYUY2(Value: Boolean);
+begin
+  if FAutoSelectYUY2 = Value then exit;
+  FAutoSelectYUY2 := Value;
+  if not DriverOpen then exit;
+  TrySelectYUY2;
 end;
 
 function TVideoCap.GetCapWidth;
@@ -1879,3 +1910,4 @@ begin
         GetDiBits(canvas.handle,handle,0,BitmapInfo.bmiHeader.biheight,FrameBuffer,BitmapInfo,DIB_RGB_COLORS);
     end;
 end.
+
