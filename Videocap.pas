@@ -1735,7 +1735,7 @@ var
 begin
   Result := False;
   if not DriverOpen then exit;
-  if FAutoSelectYUY2 then
+  if FAutoSelectYUY2 and IsNeedFixData then
   begin
     Bh := GetYUY2BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
     Result := IsBitmapHeaderSupport(Bh);
