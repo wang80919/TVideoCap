@@ -1,10 +1,12 @@
 object FormMain: TFormMain
   Left = 496
   Top = 231
-  Width = 671
-  Height = 525
   Caption = 'FormMain'
+  ClientHeight = 480
+  ClientWidth = 640
   Color = clBtnFace
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 640
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -18,15 +20,16 @@ object FormMain: TFormMain
   object GroupBoxCapture: TGroupBox
     Left = 0
     Top = 0
-    Width = 655
-    Height = 113
+    Width = 640
+    Height = 107
     Align = alTop
     Caption = 'Settings'
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 650
     object Label2: TLabel
-      Left = 24
-      Top = 27
+      Left = 16
+      Top = 24
       Width = 48
       Height = 12
       Caption = 'Drivers:'
@@ -39,11 +42,25 @@ object FormMain: TFormMain
       ParentFont = False
     end
     object Label3: TLabel
-      Left = 24
+      Left = 16
       Top = 52
       Width = 48
       Height = 12
-      Caption = 'Devkce: '
+      Caption = 'Device: '
+      FocusControl = cbxCaptureDriver
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label1: TLabel
+      Left = 487
+      Top = 24
+      Width = 36
+      Height = 12
+      Caption = 'Size :'
       FocusControl = cbxCaptureDriver
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
@@ -53,9 +70,9 @@ object FormMain: TFormMain
       ParentFont = False
     end
     object cbxCaptureDriver: TComboBox
-      Left = 88
-      Top = 22
-      Width = 346
+      Left = 70
+      Top = 21
+      Width = 403
       Height = 20
       Style = csDropDownList
       Color = clWhite
@@ -64,14 +81,13 @@ object FormMain: TFormMain
       Font.Height = -12
       Font.Name = #23435#20307
       Font.Style = []
-      ItemHeight = 12
       ParentFont = False
       TabOrder = 0
       OnChange = cbxCaptureDriverChange
     end
     object BitBtnChangeVidCap: TBitBtn
-      Left = 24
-      Top = 74
+      Left = 16
+      Top = 75
       Width = 89
       Height = 28
       Caption = 'ChangeDevice'
@@ -80,8 +96,8 @@ object FormMain: TFormMain
       OnClick = BitBtnChangeVidCapClick
     end
     object BitBtnVideoPreview: TBitBtn
-      Left = 440
-      Top = 74
+      Left = 432
+      Top = 75
       Width = 89
       Height = 28
       Caption = 'StartPreview'
@@ -90,9 +106,9 @@ object FormMain: TFormMain
       OnClick = BitBtnVideoPreviewClick
     end
     object LabelCurVIDCap: TEdit
-      Left = 88
-      Top = 48
-      Width = 346
+      Left = 70
+      Top = 49
+      Width = 228
       Height = 20
       AutoSize = False
       Color = clWhite
@@ -107,8 +123,8 @@ object FormMain: TFormMain
       Text = '__________________________________'
     end
     object BitBtnChangeFormat: TBitBtn
-      Left = 119
-      Top = 74
+      Left = 112
+      Top = 75
       Width = 89
       Height = 28
       Caption = 'ChangeFormat'
@@ -117,8 +133,8 @@ object FormMain: TFormMain
       OnClick = BitBtnChangeFormatClick
     end
     object BitBtnChangeDispaly: TBitBtn
-      Left = 216
-      Top = 74
+      Left = 208
+      Top = 75
       Width = 89
       Height = 28
       Caption = 'ChangeDispaly'
@@ -127,8 +143,8 @@ object FormMain: TFormMain
       OnClick = BitBtnChangeDispalyClick
     end
     object BitBtnChangeCompression: TBitBtn
-      Left = 311
-      Top = 74
+      Left = 304
+      Top = 75
       Width = 123
       Height = 28
       Caption = 'ChangeCompression'
@@ -136,49 +152,70 @@ object FormMain: TFormMain
       TabOrder = 4
       OnClick = BitBtnChangeCompressionClick
     end
-    object Button1: TButton
-      Left = 470
-      Top = 19
-      Width = 59
-      Height = 25
-      Caption = 'Button1'
-      TabOrder = 7
-      OnClick = Button1Click
-    end
-    object Button2: TButton
-      Left = 535
-      Top = 19
-      Width = 58
-      Height = 25
-      Caption = 'Button2'
-      TabOrder = 8
-      OnClick = Button2Click
-    end
-    object Button3: TButton
-      Left = 599
-      Top = 19
-      Width = 50
-      Height = 25
-      Caption = 'Button3'
-      TabOrder = 9
-      OnClick = Button3Click
-    end
     object BitBtnSaveToClipboard: TBitBtn
-      Left = 535
-      Top = 74
+      Left = 528
+      Top = 75
       Width = 106
       Height = 28
       Caption = 'CopyToClipboard'
       Enabled = False
-      TabOrder = 10
+      TabOrder = 7
       OnClick = BitBtnSaveToClipboardClick
+    end
+    object CheckBoxStretch: TCheckBox
+      Left = 344
+      Top = 52
+      Width = 58
+      Height = 17
+      Caption = 'Stretch'
+      TabOrder = 8
+      OnClick = CheckBoxStretchClick
+    end
+    object CheckBoxProportional: TCheckBox
+      Left = 425
+      Top = 52
+      Width = 82
+      Height = 17
+      Caption = 'Proportional'
+      Checked = True
+      State = cbChecked
+      TabOrder = 9
+      OnClick = CheckBoxProportionalClick
+    end
+    object CheckBoxCenter: TCheckBox
+      Left = 552
+      Top = 52
+      Width = 62
+      Height = 17
+      Caption = 'Center'
+      TabOrder = 10
+      OnClick = CheckBoxCenterClick
+    end
+    object ComboBoxSize: TComboBox
+      Left = 523
+      Top = 20
+      Width = 102
+      Height = 22
+      Style = csOwnerDrawFixed
+      ItemIndex = 0
+      TabOrder = 11
+      Text = 'Default(vfw)'
+      OnChange = ComboBoxSizeChange
+      Items.Strings = (
+        'Default(vfw)'
+        '800x600'
+        '1024x768'
+        '1280x1024'
+        '1280x720'
+        '1920x1080'
+        '854x480')
     end
   end
   object Capture: TVideoCap
     Left = 0
-    Top = 113
-    Width = 655
-    Height = 374
+    Top = 107
+    Width = 640
+    Height = 373
     align = alClient
     DriverOpen = False
     DriverIndex = -1
@@ -198,5 +235,7 @@ object FormMain: TFormMain
     CapIndexSize = 0
     CapToFile = True
     BufferFileSize = 0
+    ExplicitTop = 119
+    ExplicitWidth = 650
   end
 end

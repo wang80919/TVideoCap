@@ -20,10 +20,12 @@ type
     BitBtnChangeFormat: TBitBtn;
     BitBtnChangeDispaly: TBitBtn;
     BitBtnChangeCompression: TBitBtn;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
     BitBtnSaveToClipboard: TBitBtn;
+    CheckBoxStretch: TCheckBox;
+    CheckBoxProportional: TCheckBox;
+    CheckBoxCenter: TCheckBox;
+    ComboBoxSize: TComboBox;
+    Label1: TLabel;
     procedure cbxCaptureDriverChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -32,10 +34,11 @@ type
     procedure BitBtnChangeFormatClick(Sender: TObject);
     procedure BitBtnChangeDispalyClick(Sender: TObject);
     procedure BitBtnChangeCompressionClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
     procedure BitBtnSaveToClipboardClick(Sender: TObject);
+    procedure CheckBoxStretchClick(Sender: TObject);
+    procedure CheckBoxProportionalClick(Sender: TObject);
+    procedure CheckBoxCenterClick(Sender: TObject);
+    procedure ComboBoxSizeChange(Sender: TObject);
   private
     { Private declarations }
     FisShowing: Boolean;
@@ -81,6 +84,74 @@ begin
     BitBtnChangeCompression.Enabled := (cbxCaptureDriver.ItemIndex >= 0) and Capture.HasDlgFormat;
     BitBtnSaveToClipboard.Enabled := Capture.VideoPreview;
   end;
+end;
+
+procedure TFormMain.CheckBoxCenterClick(Sender: TObject);
+begin
+  Capture.PreviewfCenterToWindows := CheckBoxCenter.Checked;
+end;
+
+procedure TFormMain.CheckBoxProportionalClick(Sender: TObject);
+begin
+  Capture.PreviewScaleProportional := CheckBoxProportional.Checked;
+end;
+
+procedure TFormMain.CheckBoxStretchClick(Sender: TObject);
+begin
+  Capture.PreviewScaleToWindow := CheckBoxStretch.Checked;
+end;
+
+procedure TFormMain.ComboBoxSizeChange(Sender: TObject);
+var
+  HintStr: string;
+  Bh: TBitmapInfoHeader;
+begin
+  if not Capture.DriverOpen then exit;
+  Bh := Capture.BitMapInfoHeader;
+  case ComboBoxSize.ItemIndex of
+    1:
+    begin
+      Bh.biWidth := 800;
+      Bh.biHeight := 600;
+    end;
+    2:
+    begin
+      Bh.biWidth := 1024;
+      Bh.biHeight := 768;
+    end;
+    3:
+    begin
+      Bh.biWidth := 1280;
+      Bh.biHeight := 1024;
+    end;
+    4:
+    begin
+      Bh.biWidth := 1280;
+      Bh.biHeight := 720;
+    end;
+    5:
+    begin
+      Bh.biWidth := 1920;
+      Bh.biHeight := 1080;
+    end;
+    6:
+    begin
+      Bh.biWidth := 854;
+      Bh.biHeight := 480;
+    end;
+    //0:
+    else
+    begin
+
+    end;
+  end;
+  Bh := GetBitmapInfoHeader(Bh.biCompression, Bh.biWidth, Bh.biHeight, Bh.biBitCount);
+  if Capture.IsBitmapHeaderSupport(Bh) then
+  begin
+    Capture.BitMapInfoHeader := Bh;
+  end;
+  ClientWidth := Capture.CapWidth;
+  ClientHeight := Capture.CapHeight + GroupBoxCapture.Height;
 end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
@@ -139,7 +210,11 @@ begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
-      Capture.DlgVFormat;
+      if Capture.DlgVFormat then
+      begin
+        ComboBoxSize.ItemIndex := -1;
+        ComboBoxSize.ItemIndex := 0;
+      end;
     except
       HintStr := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
         'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
@@ -186,6 +261,7 @@ begin
     try
       Capture.VideoPreview := False;
       Capture.DriverOpen := True;
+      ComboBoxSizeChange(Sender);
       Capture.VideoPreview := True;
       if Capture.HasVideoOverlay then
         Capture.VideoOverlay := True;
@@ -224,21 +300,6 @@ begin
   begin
     BitBtnVideoPreview.Caption := 'StartPreview';
   end;
-end;
-
-procedure TFormMain.Button1Click(Sender: TObject);
-begin
-  Capture.PreviewScaleToWindow := not Capture.PreviewScaleToWindow;
-end;
-
-procedure TFormMain.Button2Click(Sender: TObject);
-begin
-  Capture.PreviewScaleProportional := not Capture.PreviewScaleProportional;
-end;
-
-procedure TFormMain.Button3Click(Sender: TObject);
-begin
-  Capture.PreviewfCenterToWindows := not Capture.PreviewfCenterToWindows;
 end;
 
 end.

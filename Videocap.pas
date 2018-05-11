@@ -284,6 +284,7 @@ function GetDriverList: TStringList;
 procedure FrameToBitmap(Bitmap:TBitmap;FrameBuffer:pointer; BitmapInfo:TBitmapInfo);
 procedure BitmapToFrame(Bitmap:TBitmap; FrameBuffer:pointer; BitmapInfo:TBitmapInfo);
 function GetVideoCapDeviceNameByDriverIndex(const DriverIndex: Cardinal; DisplayMode: Boolean = False): string;
+function GetBitmapInfoHeader(Compression: DWORD; Width, Height: Longint; BitCount: Word): TBitmapInfoHeader;
 
 
 implementation
