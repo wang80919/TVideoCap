@@ -1389,7 +1389,6 @@ function TVideoCap.CreateCapWindow;
 var
     Ex:Exception;
     savewndproc:NativeInt;
-//    Bh: TBitmapInfoHeader;
   IsFrameCallbacked: Boolean;
   IsVideoStreamCallbacked: Boolean;
 begin
@@ -1504,7 +1503,6 @@ begin
 //        //目前不支持。
 //      end;
 //    end;
-    TrySelectYUY2;
     GetDriverStatus(true);
     Sizecap;
     result:= true;
@@ -1779,6 +1777,7 @@ begin
     if value = true then
     if fhcapWnd = 0 then  CreateCapWindow;
     TestCurrentFormat;
+    TrySelectYUY2;
     capPreview(fhCapWnd,value);
     GetDriverStatus(true);
     invalidate;
@@ -1950,6 +1949,7 @@ begin
   if not DriverOpen then exit;
   if FAutoSelectYUY2 and IsNeedFixData then
   begin
+    Bh := BitMapInfoHeader;
     Bh := GetYUY2BitmapInfoHeader(Bh.biWidth, Bh.biHeight);
     Result := IsBitmapHeaderSupport(Bh);
     if Result then
