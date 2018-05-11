@@ -30,8 +30,8 @@ package videocap7;
 
 requires
   vcl,
-  designide,
-  rtl;
+  vcljpg,
+  designide;
 
 contains
   drvedit in 'drvedit.pas',

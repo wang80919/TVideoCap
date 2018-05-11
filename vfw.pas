@@ -98,6 +98,7 @@ const
   BI_IF09 = $39304649;
   BI_CPLA = $414C5043;
   BI_MJPG = $47504A4D;
+//  5EF0B0
   BI_TVMJ = $4A4D5654;
   BI_WAKE = $454B4157;
   BI_CFCC = $43434643;
@@ -133,6 +134,15 @@ type
   LONG  = longint;
   PLONG = ^LONG;
   int   = integer;
+
+{$IFDEF UNICODE}
+{$ELSE}
+  UINT8 = Byte;
+  UINT16 = WORD;
+  UINT32 = DWORD;
+{$ENDIF}
+  PByteToArray = Array of Byte;
+
 
 (****************************************************************************
  *
@@ -2392,7 +2402,8 @@ const
 type
     PVIDEOHDR               = ^TVIDEOHDR;
     TVIDEOHDR               = record
-        lpData              : PBYTE;                // pointer to locked data buffer
+        //lpData              : PBYTE;                // pointer to locked data buffer
+        lpData              : PByteToArray;         //Just for d7
         dwBufferLength      : DWORD;                // Length of data buffer
         dwBytesUsed         : DWORD;                // Bytes actually used
         dwTimeCaptured      : DWORD;                // Milliseconds from start of stream

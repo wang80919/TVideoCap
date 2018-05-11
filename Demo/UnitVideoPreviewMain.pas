@@ -100,68 +100,68 @@ end;
 
 procedure TFormMain.BitBtnChangeDispalyClick(Sender: TObject);
 var
-  sHint: string;
+  HintStr: string;
 begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
       Capture.DlgVDisplay;
     except
-      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+      HintStr := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
         'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
         'Please make sure that the device is in available state.';
-      Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+      Application.MessageBox(PChar(HintStr), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
   end;
 end;
 
 procedure TFormMain.BitBtnChangeCompressionClick(Sender: TObject);
 var
-  sHint: string;
+  HintStr: string;
 begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
       Capture.DlgVCompression;
     except
-      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+      HintStr := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
         'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
         'Please make sure that the device is in available state.';
-      Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+      Application.MessageBox(PChar(HintStr), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
   end;
 end;
 
 procedure TFormMain.BitBtnChangeFormatClick(Sender: TObject);
 var
-  sHint: string;
+  HintStr: string;
 begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
       Capture.DlgVFormat;
     except
-      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+      HintStr := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
         'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
         'Please make sure that the device is in available state.';
-      Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+      Application.MessageBox(PChar(HintStr), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
   end;
 end;
 
 procedure TFormMain.BitBtnChangeVidCapClick(Sender: TObject);
 var
-  sHint: string;
+  HintStr: string;
 begin
   if cbxCaptureDriver.ItemIndex >= 0 then
   begin
     try
       Capture.DlgVSource;
     except
-      sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+      HintStr := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
         'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
         'Please make sure that the device is in available state.';
-      Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+      Application.MessageBox(PChar(HintStr), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
     end;
     LabelCurVIDCap.Text :=  GetVideoCapDeviceNameByDriverIndex(cbxCaptureDriver.ItemIndex, True);
   end;
@@ -174,7 +174,7 @@ end;
 
 procedure TFormMain.BitBtnVideoPreviewClick(Sender: TObject);
 var
-  sHint: string;
+  HintStr: string;
 begin
   if Capture.VideoPreview then
   begin
@@ -202,16 +202,16 @@ begin
     except
       on E: EFalseFormat do
       begin
-        sHint := 'The current format not support, please click ChangeFormat button.';
-        Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+        HintStr := 'The current format not support, please click ChangeFormat button.';
+        Application.MessageBox(PChar(HintStr), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
         exit;
       end;
       else
       begin
-        sHint := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
+        HintStr := 'The camera equipment for the designated photo is not currently available.' + sLineBreak +
           'Please check whether the camera is connected to the computer properly. ' + sLineBreak +
           'Please make sure that the device is in available state.';
-        Application.MessageBox(PChar(sHint), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
+        Application.MessageBox(PChar(HintStr), PChar('Message'), MB_OK or MB_ICONSTOP or MB_TOPMOST);
       end;
     end;
   end;

@@ -30,6 +30,7 @@ package videocap5;
 
 requires
   vcl,
+  vcljpg,
   designide;
 
 contains

@@ -29,6 +29,7 @@ package videocap5;
 {$IMPLICITBUILD ON}
 requires
   vcl,
+  vcljpg,
   designide;
 
 contains

@@ -1,9 +1,9 @@
 object FormMain: TFormMain
-  Left = 393
-  Top = 281
+  Left = 496
+  Top = 231
+  Width = 671
+  Height = 525
   Caption = 'FormMain'
-  ClientHeight = 487
-  ClientWidth = 655
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -64,6 +64,7 @@ object FormMain: TFormMain
       Font.Height = -12
       Font.Name = #23435#20307
       Font.Style = []
+      ItemHeight = 12
       ParentFont = False
       TabOrder = 0
       OnChange = cbxCaptureDriverChange
@@ -179,13 +180,14 @@ object FormMain: TFormMain
     Width = 655
     Height = 374
     align = alClient
-    color = clBlack
     DriverOpen = False
     DriverIndex = -1
     VideoOverlay = False
     VideoPreview = False
     PreviewScaleToWindow = False
     PreviewScaleProportional = True
+    PreviewfCenterToWindows = False
+    AutoSelectYUY2 = True
     PreviewRate = 30
     MicroSecPerFrame = 66667
     FrameRate = 15
