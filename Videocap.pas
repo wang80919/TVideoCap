@@ -3,7 +3,7 @@ File Name   : Videocap.pas
 Author      : gcasais
 Date Created: 21/01/2004
 Language    : ES-AR
-Description : Objetos, Wrappers y m®¶todos para VFW
+Description : Objetos, Wrappers y m√©todos para VFW
 *******************************************************************************}
 unit Videocap;
 
@@ -20,11 +20,13 @@ type
  TResolution  = (r8Bit, r16Bit);
 
 type
-  TCapStatusProc        = procedure (Sender: TObject) of object;
+  TCapStatusProc        = TNotifyEvent;
   TCapStatusCallback    = procedure (Sender:TObject; nID:integer; status:string) of object;
   TVideoStream          = procedure (sender:TObject; lpVhdr:PVIDEOHDR) of object;
   TAudioStream          = procedure (sender:TObject; lpWHdr:PWAVEHDR) of object;
   TError                = procedure (sender:TObject; nID:integer; errorstr:string) of object;
+  TOnNewPreviewFrameMemoryNotifyEvent = procedure (Sender: TObject; MemoryForFrame: TMemoryStream) of object;
+  TOnNewPreviewFrameImageNotifyEvent = procedure (Sender: TObject; ImageForFrame: TImage) of object;
 
 
 // Excepciones
@@ -57,73 +59,75 @@ TAudioFormat = class (TPersistent)
 type
   TVideoCap = class(TCustomControl)
   private
+    FOnNewPreviewFrameMemory: TOnNewPreviewFrameMemoryNotifyEvent;
+    FOnNewPreviewFrameImage: TOnNewPreviewFrameImageNotifyEvent;
     FAutoSelectYUY2: Boolean;
     FJPEGSectionTypeList: array of UInt8;
     FMemorForPreview: TMemoryStream;
     FImgForPreview: TImage;
     FControlForPreview: TCustomControl;
     fCenter: Boolean;
-   fdriverIndex         : Integer;
-   fVideoDriverName     : String;
-   fhCapWnd             : THandle;
-   fpDrivercaps         : PCapDriverCaps;
-   fpDriverStatus       : pCapStatus;
-   fscale               : Boolean;
-   fprop                : Boolean;
-   fpreviewrate         : Word;
-   fmicrosecpframe      : Cardinal;
-   fCapVideoFileName    : String;
-   fTempFileName        : String;
-   fTempFileSize        : Word;
-   fCapSingleImageFileName : String;
-   fcapAudio               : Boolean;
-   fcapTimeLimit           : Word;
-   fIndexSize              : Cardinal;
-   fcapToFile              : Boolean;
-   FAudioFormat            : TAudioFormat;
-   fCapStatusProcedure     : TCapStatusProc;
-   fcapStatusCallBack      : TCapStatusCallback;
-   fcapVideoStream         : TVideoStream;
-   fcapAudioStream         : TAudiostream;
-   fcapFrameCallback       : TVideoStream;
-   fcapError               : TError;
+    fdriverIndex         : Integer;
+    fVideoDriverName     : String;
+    fhCapWnd             : THandle;
+    fpDrivercaps         : PCapDriverCaps;
+    fpDriverStatus       : pCapStatus;
+    fscale               : Boolean;
+    fprop                : Boolean;
+    fpreviewrate         : Word;
+    fmicrosecpframe      : Cardinal;
+    fCapVideoFileName    : String;
+    fTempFileName        : String;
+    fTempFileSize        : Word;
+    fCapSingleImageFileName : String;
+    fcapAudio               : Boolean;
+    fcapTimeLimit           : Word;
+    fIndexSize              : Cardinal;
+    fcapToFile              : Boolean;
+    FAudioFormat            : TAudioFormat;
+    fCapStatusprocedure     : TCapStatusProc;
+    fcapStatusCallBack      : TCapStatusCallback;
+    fcapVideoStream         : TVideoStream;
+    fcapAudioStream         : TAudiostream;
+    fcapFrameCallback       : TVideoStream;
+    fcapError               : TError;
 
-   procedure Setsize(var msg:TMessage); message WM_SIZE;
-   function GetDriverCaps: Boolean;
-   procedure DeleteDriverProps;
-   procedure CreateTmpFile (drvopn: Boolean);
-   function GetDriverStatus (callback:boolean): Boolean;
-   Procedure SetDriverOpen (value: Boolean) ;
-   function GetDriverOpen : Boolean;
-   function GetPreview: Boolean;
-   function GetOverlay: Boolean;
-   procedure SizeCap;
-   procedure Setprop (value: Boolean);
-   procedure SetCenter(Value: Boolean);
-   procedure SetAutoSelectYUY2(Value: Boolean);
-   procedure SetMicroSecPerFrame(value: Cardinal);
-   procedure setFrameRate (value: Word);
-   function  GetFrameRate: Word;
-
-   procedure SetDriverIndex(value:integer);
-   function CreateCapWindow:boolean;
-   procedure DestroyCapwindow;
-   function GetCapWidth:word;
-   function GetCapHeight:word;
-   function  GetHasDlgVFormat  : Boolean;
-   function  GetHasDlgVDisplay : Boolean;
-   function  GetHasDlgVSource  : Boolean;
-   function  GetHasVideoOverlay: Boolean;
-   procedure Setoverlay(value:boolean);
-   procedure SetPreview(value:boolean);
-   procedure SetScale(value:Boolean);
-   procedure SetpreviewRate(value:word);
-   function GetCapInProgress:boolean;
-   procedure SetIndexSize(value:cardinal);
-   function GetBitMapInfoNP:TBITMAPINFO;
-   function GetBitmapHeader:TBitmapInfoHeader;
-   procedure SetBitmapHeader(Header:TBitmapInfoHeader);
-   procedure SetBufferFileSize(value:word);
+    procedure Setsize(var msg:TMessage); message WM_SIZE;
+    function GetDriverCaps: Boolean;
+    procedure DeleteDriverProps;
+    procedure CreateTmpFile (drvopn: Boolean);
+    function GetDriverStatus (callback:boolean): Boolean;
+    procedure SetDriverOpen (value: Boolean) ;
+    function GetDriverOpen : Boolean;
+    function GetPreview: Boolean;
+    function GetOverlay: Boolean;
+    procedure SizeCap;
+    procedure Setprop (value: Boolean);
+    procedure SetCenter(Value: Boolean);
+    procedure SetAutoSelectYUY2(Value: Boolean);
+    procedure SetMicroSecPerFrame(value: Cardinal);
+    procedure setFrameRate (value: Word);
+    function  GetFrameRate: Word;
+ 
+    procedure SetDriverIndex(value:integer);
+    function CreateCapWindow:boolean;
+    procedure DestroyCapwindow;
+    function GetCapWidth:word;
+    function GetCapHeight:word;
+    function  GetHasDlgVFormat  : Boolean;
+    function  GetHasDlgVDisplay : Boolean;
+    function  GetHasDlgVSource  : Boolean;
+    function  GetHasVideoOverlay: Boolean;
+    procedure Setoverlay(value:boolean);
+    procedure SetPreview(value:boolean);
+    procedure SetScale(value:Boolean);
+    procedure SetpreviewRate(value:word);
+    function GetCapInProgress:boolean;
+    procedure SetIndexSize(value:cardinal);
+    function GetBitMapInfoNP:TBITMAPINFO;
+    function GetBitmapHeader:TBitmapInfoHeader;
+    procedure SetBitmapHeader(Header:TBitmapInfoHeader);
+    procedure SetBufferFileSize(value:word);
 
 
 //  CallBacks de captura
@@ -152,18 +156,18 @@ type
     function GetControlExtents: TRect; override;
   public
     procedure SetBounds(ALeft: Integer; ATop: Integer; AWidth: Integer; AHeight: Integer); override;
-     procedure SetDriverName(value:String);
-     constructor Create(AOwner: TComponent); override;
-     destructor destroy; override;
-     property  HasDlgFormat:Boolean read GetHasDlgVFormat;
-     property  HasDlgDisplay:Boolean read GetHasDlgVDisplay;
-     property  HasDlgSource:Boolean read GetHasDlgVSource;
-     property  HasVideoOverlay:boolean read GetHasVideoOverlay;
-     property  CapWidth: word read GetCapWidth;
-     property  CapHeight: word read GetCapHeight;
-     property  CapInProgess: boolean read getCapinProgress;
-     property  BitMapInfo:TBitmapinfo read GetBitmapInfoNP;
-//  Header Bitmapinfo
+    procedure SetDriverName(value:String);
+    constructor Create(AOwner: TComponent); override;
+    destructor destroy; override;
+    property  HasDlgFormat:Boolean read GetHasDlgVFormat;
+    property  HasDlgDisplay:Boolean read GetHasDlgVDisplay;
+    property  HasDlgSource:Boolean read GetHasDlgVSource;
+    property  HasVideoOverlay:boolean read GetHasVideoOverlay;
+    property  CapWidth: word read GetCapWidth;
+    property  CapHeight: word read GetCapHeight;
+    property  CapInProgess: boolean read getCapinProgress;
+    property  BitMapInfo:TBitmapinfo read GetBitmapInfoNP;
+//    Header Bitmapinfo
     function DlgVFormat:Boolean;
     function DlgVDisplay:boolean;
     function DlgVSource:boolean;
@@ -186,44 +190,47 @@ type
     function IsCurrentFormatNotSupport: Boolean;
     function CurrentIsBitmapFormat: Boolean;
     function IsNeedFixData: Boolean;
+    function IsNotifyDataEvent: Boolean;
     function TrySelectYUY2: Boolean;
- published
+  published
+    property OnNewPreviewFrameMemory: TOnNewPreviewFrameMemoryNotifyEvent read FOnNewPreviewFrameMemory write FOnNewPreviewFrameMemory;
+    property OnNewPreviewFrameImage: TOnNewPreviewFrameImageNotifyEvent read FOnNewPreviewFrameImage write FOnNewPreviewFrameImage;
     property AutoSize;
-   property align;
-   property color default clBlack;
-   property visible;
-   property DriverOpen: boolean read getDriveropen write setDriverOpen;
-   property DriverIndex:integer read fdriverindex write SetDriverIndex;
-   property DriverName: string read fVideoDriverName write SetDrivername;
-   property VideoOverlay:boolean read GetOverlay write SetOverlay;
-   property VideoPreview:boolean read GetPreview write SetPreview;
-   property PreviewScaleToWindow:boolean read fscale write Setscale;
-   property PreviewScaleProportional:boolean read fprop write Setprop;
-   property PreviewfCenterToWindows: Boolean read fCenter write SetCenter;
-   Property AutoSelectYUY2: Boolean read FAutoSelectYUY2 write SetAutoSelectYUY2;
-   property PreviewRate:word read fpreviewrate write SetpreviewRate;
-   property MicroSecPerFrame:cardinal read  fmicrosecpframe write SetMicroSecPerFrame;
-   property FrameRate:word read  getFramerate write setFrameRate;
-   Property CapAudio:Boolean read fcapAudio write fcapAudio;
-   property VideoFileName:string read fCapVideoFileName   write fCapVideoFileName;
-   property SingleImageFile:string read FCapSingleImageFileName write FCapSingleImageFileName;
-   property CapTimeLimit:word read fCapTimeLimit write fCapTimeLimit;
-   property CapIndexSize:cardinal read findexSize write setIndexSize;
-   property CapToFile:boolean read fcaptoFile write fcapToFile;
-   property CapAudioFormat:TAudioformat read FAudioformat write FAudioFormat;
-   property BufferFileSize:word read ftempfilesize write SetBufferFileSize;
-   property OnStatus:TCapStatusProc read fCapStatusProcedure write FCapStatusProcedure;
-   property OnStatusCallback:TCapStatusCallback read fcapStatuscallback write SetStatCallback;
-   property OnVideoStream:TVideoStream read fcapVideoStream write SetCapVideoStream;
-   property OnFrameCallback:TVideoStream read FcapFramecallback write SetCapFrameCallback;
-   property OnAudioStream:TAudioStream read fcapAudioStream write SetCapAudioStream;
-   property OnError:TError read fcapError write SetCapError;
-   property OnMouseMove;
-   property OnMouseUp;
-   property OnMouseDown;
-   property OnClick;
-   Property OnDblClick;
- end;
+    property align;
+    property color default clBlack;
+    property visible;
+    property DriverOpen: boolean read getDriveropen write setDriverOpen;
+    property DriverIndex:integer read fdriverindex write SetDriverIndex;
+    property DriverName: string read fVideoDriverName write SetDrivername;
+    property VideoOverlay:boolean read GetOverlay write SetOverlay;
+    property VideoPreview:boolean read GetPreview write SetPreview;
+    property PreviewScaleToWindow:boolean read fscale write Setscale;
+    property PreviewScaleProportional:boolean read fprop write Setprop;
+    property PreviewfCenterToWindows: Boolean read fCenter write SetCenter;
+    Property AutoSelectYUY2: Boolean read FAutoSelectYUY2 write SetAutoSelectYUY2;
+    property PreviewRate:word read fpreviewrate write SetpreviewRate;
+    property MicroSecPerFrame:cardinal read  fmicrosecpframe write SetMicroSecPerFrame;
+    property FrameRate:word read  getFramerate write setFrameRate;
+    Property CapAudio:Boolean read fcapAudio write fcapAudio;
+    property VideoFileName:string read fCapVideoFileName   write fCapVideoFileName;
+    property SingleImageFile:string read FCapSingleImageFileName write FCapSingleImageFileName;
+    property CapTimeLimit:word read fCapTimeLimit write fCapTimeLimit;
+    property CapIndexSize:cardinal read findexSize write setIndexSize;
+    property CapToFile:boolean read fcaptoFile write fcapToFile;
+    property CapAudioFormat:TAudioformat read FAudioformat write FAudioFormat;
+    property BufferFileSize:word read ftempfilesize write SetBufferFileSize;
+    property OnStatus:TCapStatusProc read fCapStatusprocedure write FCapStatusProcedure;
+    property OnStatusCallback:TCapStatusCallback read fcapStatuscallback write SetStatCallback;
+    property OnVideoStream:TVideoStream read fcapVideoStream write SetCapVideoStream;
+    property OnFrameCallback:TVideoStream read FcapFramecallback write SetCapFrameCallback;
+    property OnAudioStream:TAudioStream read fcapAudioStream write SetCapAudioStream;
+    property OnError:TError read fcapError write SetCapError;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseDown;
+    property OnClick;
+    Property OnDblClick;
+  end;
 
  const Jpeg_default_dht: array[0..419] of Byte = (
       $ff,$c4,
@@ -486,15 +493,15 @@ function VideoStreamCallbackProc(hWnd:Hwnd; lpVHdr:PVIDEOHDR):LRESULT; stdcall;
 begin
     Control:= TVideoCap(capGetUserData(hwnd));
     if Assigned(control) then begin
+      if Assigned(control.fcapVideoStream ) then
+      begin
+          control.fcapVideoStream(control,lpvHdr);
+          Result := 1;
+      end;
       if Control.VideoPreview then
       begin
         Result := Control.CaptureFrameForPreview(lpVhdr);
       end;
-        if Assigned(control.fcapVideoStream ) then
-        begin
-            control.fcapVideoStream(control,lpvHdr);
-            Result := 1;
-        end;
     end;
 end;
 
@@ -519,12 +526,12 @@ var
 begin
     Control:= TVideoCap(capGetUserData(hwnd));
     if Assigned(Control) then begin
+      if Assigned(Control.fcapFrameCallback ) then
+      begin
+          Control.fcapFrameCallback(control,lpvHdr);
+          Result := 1;
+      end;
       Result := Control.CaptureFrameForPreview(lpVhdr);
-          if Assigned(Control.fcapFrameCallback ) then
-          begin
-              Control.fcapFrameCallback(control,lpvHdr);
-              Result := 1;
-          end;
     end;
 end;
 
@@ -597,7 +604,7 @@ begin
     fcapToFile              := true;
     findexSize              := 0;
     ftempFileSize           := 0;
-    fCapStatusProcedure     := nil;
+    fCapStatusprocedure     := nil;
     fcapStatusCallBack      := nil;
     fcapVideoStream         := nil;
     fcapAudioStream         := nil;
@@ -640,6 +647,19 @@ begin
           (Bh.biCompression = BI_RGB24) or
           (Bh.biCompression = BI_ARGB32) or
           (Bh.biCompression = BI_RGB32);
+end;
+
+function TVideoCap.IsNotifyDataEvent: Boolean;
+begin
+  Result := False;
+  if not Result then
+  begin
+    Result := Assigned(OnNewPreviewFrameImage);
+  end;
+  if not Result then
+  begin
+    Result := Assigned(OnNewPreviewFrameMemory);
+  end;
 end;
 
 function TVideoCap.IsNeedFixData: Boolean;
@@ -793,7 +813,7 @@ var
 begin
   Result := 0;
 //  IsCloseData := True;
-  if (lpvhdr <> nil) and (lpvhdr.dwBytesUsed <> 0) and IsNeedFixData then
+  if (lpvhdr <> nil) and (lpvhdr.dwBytesUsed <> 0) and (IsNeedFixData or IsNotifyDataEvent) then
   begin
 //    FillMemory(@bihIn, Sizeof(BITMAPINFOHEADER), 0);
 //    FillMemory(@bihOut, Sizeof(BITMAPINFOHEADER), 0);
@@ -871,7 +891,6 @@ begin
           end;
           Inc(I);
         end;
-        T := lpvhdr.lpData[I];
         Inc(C);
         Inc(I);
         WordRec(S).Hi := lpvhdr.lpData[I];
@@ -907,7 +926,7 @@ begin
       //https://blog.csdn.net/yangysng07/article/details/9025443
       for I := 0 to lpVhdr.dwBytesUsed div 2 - 1 do
       begin
-        //’“µΩ DQT;
+        //ÊâæÂà∞ DQT;
         if (lpVhdr.lpData[I * 2] = $FF) and (lpVhdr.lpData[I * 2 + 1] = $DB) then
         begin
           BeginIndex := I * 2;
@@ -930,16 +949,16 @@ begin
         if True then        
         begin
           FMemorForPreview.Position := 0;
-          //–¥»Î JPEG_SIO
+          //ÂÜôÂÖ• JPEG_SIO
           FMemorForPreview.Write(Jpeg_default_sio[0], Length(Jpeg_default_sio));
           if not FindJPEGSectionType(FJPEGSectionTypeList, $D8) then
           begin
-            //–¥»Î JPEG_APP0
+            //ÂÜôÂÖ• JPEG_APP0
             FMemorForPreview.Write(Jpeg_default_app0[0], Length(Jpeg_default_app0));
           end;
           if not FindJPEGSectionType(FJPEGSectionTypeList, $C4) then
           begin
-            //–¥»Î JPEG_DHT
+            //ÂÜôÂÖ• JPEG_DHT
             FMemorForPreview.Write(Jpeg_default_dht[0], Length(Jpeg_default_dht));
           end;
           FMemorForPreview.Write(lpVhdr.lpData[BeginIndex], EndIndex - BeginIndex + 2);
@@ -956,24 +975,24 @@ begin
 {$ENDIF}
       end;
     end
-//    else if CurrentIsBitmapFormat then
-//    begin
-//      Bmpfilehd.bfType := $DBFF;
-//      Bmpfilehd.bfSize := lpVhdr.dwBytesUsed + SizeOf(Bmpfilehd) + SizeOf(bmpInfo.bmiHeader);
-//      Bmpfilehd.bfReserved1 := 0;
-//      Bmpfilehd.bfReserved2 := 0;
-//      Bmpfilehd.bfOffBits := SizeOf(Bmpfilehd) + SizeOf(bmpInfo.bmiHeader);
-//      FMemorForPreview.Position := 0;
-//      FMemorForPreview.Write(Bmpfilehd, SizeOf(Bmpfilehd));
-//      FMemorForPreview.Write(bmpInfo.bmiHeader, SizeOf(bmpInfo.bmiHeader));
-//      FMemorForPreview.Write(lpVhdr.lpData[0], lpVhdr.dwBytesUsed);
-//      FMemorForPreview.Size := FMemorForPreview.Position;
+    else if CurrentIsBitmapFormat and IsNotifyDataEvent then
+    begin
+      Bmpfilehd.bfType := $DBFF;
+      Bmpfilehd.bfSize := lpVhdr.dwBytesUsed + SizeOf(Bmpfilehd) + SizeOf(bmpInfo.bmiHeader);
+      Bmpfilehd.bfReserved1 := 0;
+      Bmpfilehd.bfReserved2 := 0;
+      Bmpfilehd.bfOffBits := SizeOf(Bmpfilehd) + SizeOf(bmpInfo.bmiHeader);
+      FMemorForPreview.Position := 0;
+      FMemorForPreview.Write(Bmpfilehd, SizeOf(Bmpfilehd));
+      FMemorForPreview.Write(bmpInfo.bmiHeader, SizeOf(bmpInfo.bmiHeader));
+      FMemorForPreview.Write(lpVhdr.lpData[0], lpVhdr.dwBytesUsed);
+      FMemorForPreview.Size := FMemorForPreview.Position;
 {$IFDEF UNICODE}
-//      SavePreviewToMemory;
+        SavePreviewToMemory;
 {$ELSE}
-//      SavePreviewToMemory(True);
+        SavePreviewToMemory(True);
 {$ENDIF}
-//    end
+    end
     else
     begin
       DestroyImgForPreview;
@@ -995,11 +1014,16 @@ var
   JpegImg: TJPEGImage;
 begin
 {$IFDEF DEBUG}
-  FMemorForPreview.Position := 0;
-  FMemorForPreview.SaveToFile('c:\a.jpg');
+//  FMemorForPreview.Position := 0;
+//  FMemorForPreview.SaveToFile('c:\a.jpg');
 {$ENDIF}
   CreateImgForPreview;
   FMemorForPreview.Position := 0;
+  if Assigned(OnNewPreviewFrameMemory) then
+  begin
+    OnNewPreviewFrameMemory(Self, FMemorForPreview);
+    FMemorForPreview.Position := 0;
+  end;
   FImgForPreview.AutoSize := True;
   FImgForPreview.Center := False;
   FImgForPreview.Stretch := False;
@@ -1025,7 +1049,7 @@ begin
     end;
 {$ENDIF}
   except
-    //∑¢…˙¥ÌŒÛÕ£÷π°£
+    //ÂèëÁîüÈîôËØØÂÅúÊ≠¢„ÄÇ
     capPreview(fhCapWnd, False);
     Raise;
   end;
@@ -1033,6 +1057,10 @@ begin
   FImgForPreview.Proportional := fprop;
   FImgForPreview.Stretch := fscale;
   FImgForPreview.Center := fCenter;
+  if Assigned(OnNewPreviewFrameImage) then
+  begin
+    OnNewPreviewFrameImage(Self, FImgForPreview);
+  end;
 end;
 
 procedure TVideoCap.CreateImgForPreview;
@@ -1339,13 +1367,13 @@ end;
 function TVideoCap.getDriverStatus(callback:boolean):boolean;
 begin
   result := false;
+ if assigned(fCapStatusProcedure)and callback then fcapStatusprocedure (Self);
   if fhCapWnd <> 0 then begin
         if not assigned(fpDriverstatus) then new(fpDriverStatus);
         if capGetStatus(fhCapWnd,fpdriverstatus, sizeof(TCapStatus)) then begin
             result:= true;
         end;
   end;
- if assigned(fCapStatusProcedure)and callback then fcapStatusProcedure (Self);
 end;
 
 procedure TVideoCap.SetDrivername(value:string);
@@ -1454,13 +1482,13 @@ begin
         end;
         exit;
     end;
-    if (not IsFrameCallbacked) or IsNeedFixData then
+    if (not IsFrameCallbacked) or (IsNeedFixData or IsNotifyDataEvent) then
     begin
       capSetCallbackOnVideoStream(fhcapwnd, @VideoStreamCallbackProc);
       IsFrameCallbacked := True;
     end;
 
-    if not IsVideoStreamCallbacked or IsNeedFixData then
+    if not IsVideoStreamCallbacked or (IsNeedFixData or IsNotifyDataEvent) then
     begin
       capSetCallbackOnFrame(fhcapWnd, @FrameCallbackProc);
       IsVideoStreamCallbacked := True;
@@ -1501,7 +1529,7 @@ begin
 //      Bh := BitMapInfoHeader;
 //      if Bh.biCompression = BI_MJPG  then
 //      begin
-//        //ƒø«∞≤ª÷ß≥÷°£
+//        //ÁõÆÂâç‰∏çÊîØÊåÅ„ÄÇ
 //      end;
 //    end;
     GetDriverStatus(true);
@@ -1892,7 +1920,7 @@ begin
     result:= fpDriverStatus^.fCapturingNow ;
 end;
 
-Procedure TVideoCap.SetScale(value:boolean);
+procedure TVideoCap.SetScale(value:boolean);
 begin
     if value = fscale then  exit;
     fscale:= value;
@@ -1910,7 +1938,7 @@ begin
     end;
 end;
 
-Procedure TVideoCap.Setprop(value:Boolean);
+procedure TVideoCap.Setprop(value:Boolean);
 begin
     if value = fprop then exit;
     fprop:=value;
@@ -1980,7 +2008,7 @@ begin
         else Result:= 0;
 end;
 
-Procedure TVideoCap.SetDriverOpen(value:boolean);
+procedure TVideoCap.SetDriverOpen(value:boolean);
 begin
     if value = GetDriverOpen then exit;
     if value = false then DestroyCapWindow;
@@ -2078,7 +2106,7 @@ begin
      capSetAudioFormat(handle,@WAVEFORMATEX, SizeOf(TWAVEFORMATEX));
 end;
 
-Function GetDriverList:TStringList;
+function GetDriverList:TStringList;
 var
     i: integer;
     Name: array[0..80] of char;
